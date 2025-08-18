@@ -1,34 +1,34 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Table
+from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
-from .database import Base
+from sqlalchemy.types import JSON
+from app.database import Base
 
-recipe_tags = Table(
-    'recipe_tags',
+# Зв'язок рецепти ↔ теги
+recipe_tag_table = Table(
+    'recipe_tag',
     Base.metadata,
-    Column('recipe_id', ForeignKey('recipes.id'), primary_key=True),
-    Column('tag_id', ForeignKey('tags.id'), primary_key=True)
+    Column('recipe_id', Integer, ForeignKey('recipes.id')),
+    Column('tag_id', Integer, ForeignKey('tags.id'))
 )
-
-class Category(Base):
-    __tablename__ = "categories"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
-    recipes = relationship("Recipe", back_populates="category")
 
 class Tag(Base):
     __tablename__ = "tags"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
-    recipes = relationship("Recipe", secondary=recipe_tags, back_populates="tags")
+
+class Category(Base):
+    __tablename__ = "categories"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
 
 class Recipe(Base):
     __tablename__ = "recipes"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
-    description = Column(Text)
-    ingredients = Column(Text)
-    steps = Column(Text)
+    description = Column(String, nullable=True)
+    ingredients = Column(JSON, nullable=False)  # список {name, quantity, unit}
+    steps = Column(String)
     servings = Column(Integer)
     category_id = Column(Integer, ForeignKey("categories.id"))
-    category = relationship("Category", back_populates="recipes")
-    tags = relationship("Tag", secondary=recipe_tags, back_populates="recipes")
+    category = relationship("Category")
+    tags = relationship("Tag", secondary=recipe_tag_table)

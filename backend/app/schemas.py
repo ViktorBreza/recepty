@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
+# -------------------------------
+# Категорії та теги
+# -------------------------------
 class TagBase(BaseModel):
     name: str
 
@@ -23,10 +26,21 @@ class Category(CategoryBase):
     class Config:
         orm_mode = True
 
+# -------------------------------
+# Структура інгредієнта
+# -------------------------------
+class Ingredient(BaseModel):
+    name: str
+    quantity: float
+    unit: str  # наприклад: "г", "кг", "ст.л.", "ч.л.", "мл"
+
+# -------------------------------
+# Рецепти
+# -------------------------------
 class RecipeBase(BaseModel):
     title: str
     description: Optional[str] = None
-    ingredients: str
+    ingredients: List[Ingredient]
     steps: str
     servings: int
     category_id: int
@@ -39,5 +53,6 @@ class Recipe(RecipeBase):
     id: int
     category: Category
     tags: List[Tag] = []
+
     class Config:
         orm_mode = True
