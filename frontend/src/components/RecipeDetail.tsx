@@ -4,6 +4,8 @@ import axios from 'axios';
 import { Recipe } from '../types';
 import PortionCalculator from './PortionCalculator';
 import CookingSteps from './CookingSteps';
+import StarRating from './StarRating';
+import CommentSystem from './CommentSystem';
 import { useAuth } from '../contexts/AuthContext';
 
 const RecipeDetail: React.FC = () => {
@@ -58,9 +60,14 @@ const RecipeDetail: React.FC = () => {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-start mb-3">
-        <div>
+        <div className="flex-grow-1">
           <h2>{recipe.title}</h2>
           <p className="lead">{recipe.description}</p>
+          
+          {/* Рейтинг рецепту */}
+          <div className="mb-3">
+            <StarRating recipeId={recipe.id} />
+          </div>
         </div>
         {isAuthenticated && (
           <div className="btn-group">
@@ -117,6 +124,10 @@ const RecipeDetail: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Система коментарів */}
+      <hr className="my-4" />
+      <CommentSystem recipeId={recipe.id} />
     </div>
   );
 };

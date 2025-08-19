@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime, Boolean, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import JSON
 from sqlalchemy.sql import func
@@ -53,3 +53,36 @@ class Recipe(Base):
     category = relationship("Category")
     tags = relationship("Tag", secondary=recipe_tag_table)
     author = relationship("User", back_populates="recipes")
+    ratings = relationship("Rating", back_populates="recipe", cascade="all, delete-orphan")
+    comments = relationship("Comment", back_populates="recipe", cascade="all, delete-orphan")
+
+
+class Rating(Base):
+    __tablename__ = "ratings"
+    id = Column(Integer, primary_key=True, index=True)
+    recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # nullable для анонімних користувачів
+    session_id = Column(String, nullable=True)  # для анонімних користувачів
+    rating = Column(Integer, nullable=False)  # від 1 до 5
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Зв'язки
+    recipe = relationship("Recipe", back_populates="ratings")
+    user = relationship("User")
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+    id = Column(Integer, primary_key=True, index=True)
+    recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # nullable для анонімних користувачів
+    session_id = Column(String, nullable=True)  # для анонімних користувачів
+    author_name = Column(String, nullable=False)  # ім'я автора (для анонімних або з User)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Зв'язки
+    recipe = relationship("Recipe", back_populates="comments")
+    user = relationship("User")

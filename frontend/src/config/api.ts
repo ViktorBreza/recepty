@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE_URL = 'http://127.0.0.1:8002';
+export const API_BASE_URL = 'http://127.0.0.1:8001';
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -19,4 +19,10 @@ export const API_ENDPOINTS = {
   
   // Media
   MEDIA_UPLOAD: `${API_BASE_URL}/media`,
+  
+  // Ratings
+  RATINGS: `${API_BASE_URL}/ratings`,
+  
+  // Comments
+  COMMENTS: `${API_BASE_URL}/comments`,
 };

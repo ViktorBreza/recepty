@@ -111,6 +111,54 @@ class UserLogin(BaseModel):
     password: str
 
 # -------------------------------
+# Рейтинги та коментарі
+# -------------------------------
+class RatingBase(BaseModel):
+    rating: int  # від 1 до 5
+
+class RatingCreate(BaseModel):
+    recipe_id: int
+    rating: int  # від 1 до 5
+    session_id: Optional[str] = None  # для анонімних користувачів
+
+class Rating(RatingBase):
+    id: int
+    recipe_id: int
+    user_id: Optional[int] = None
+    session_id: Optional[str] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    user: Optional[User] = None
+
+    class Config:
+        from_attributes = True
+
+class CommentBase(BaseModel):
+    content: str
+    author_name: str
+
+class CommentCreate(CommentBase):
+    recipe_id: int
+    session_id: Optional[str] = None  # для анонімних користувачів
+
+class Comment(CommentBase):
+    id: int
+    recipe_id: int
+    user_id: Optional[int] = None
+    session_id: Optional[str] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    user: Optional[User] = None
+
+    class Config:
+        from_attributes = True
+
+class RecipeStats(BaseModel):
+    average_rating: Optional[float] = None
+    total_ratings: int = 0
+    total_comments: int = 0
+
+# -------------------------------
 # Оновлені схеми рецептів
 # -------------------------------
 class Recipe(RecipeBase):
@@ -118,6 +166,8 @@ class Recipe(RecipeBase):
     category: Optional[Category] = None
     tags: List[Tag] = []
     author: Optional[User] = None
+    ratings: List[Rating] = []
+    comments: List[Comment] = []
     created_at: datetime
     updated_at: Optional[datetime] = None
 

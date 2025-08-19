@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Recipe } from '../types';
+import StarRating from './StarRating';
 import { useAuth } from '../contexts/AuthContext';
 
 interface RecipeListProps {
@@ -94,6 +95,16 @@ const RecipeList: React.FC<RecipeListProps> = ({ onDelete }) => {
                   Порцій: {recipe.servings}
                 </small>
               </p>
+              
+              {/* Рейтинг рецепту */}
+              <div className="mb-2">
+                <StarRating 
+                  recipeId={recipe.id} 
+                  size="sm" 
+                  readonly={true}
+                  showLabel={true}
+                />
+              </div>
               <div className="mt-auto">
                 <div className="btn-group w-100" role="group">
                   <Link 

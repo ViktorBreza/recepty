@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.database import Base, engine
-from app.routers import recipes, categories, tags, media, auth
+from app.routers import recipes, categories, tags, media, auth, ratings, comments
 
 app = FastAPI(title="Recipe App API")
 
@@ -39,4 +39,6 @@ app.include_router(recipes.router)
 app.include_router(categories.router)
 app.include_router(tags.router)
 app.include_router(media.router)
+app.include_router(ratings.router)
+app.include_router(comments.router)
 # This is the main entry point for the FastAPI application.
