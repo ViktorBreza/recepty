@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import List, Optional, Union, Any
+from datetime import datetime
 
 # -------------------------------
 # Категорії та теги
@@ -70,10 +71,55 @@ class RecipeBase(BaseModel):
 class RecipeCreate(RecipeBase):
     pass
 
+# -------------------------------
+# Користувачі та аутентифікація
+# -------------------------------
+class UserBase(BaseModel):
+    email: EmailStr
+    username: str
+
+class UserCreate(UserBase):
+    password: str
+
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    username: Optional[str] = None
+    is_active: Optional[bool] = None
+
+class User(UserBase):
+    id: int
+    is_admin: bool
+    is_active: bool
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+class UserInDB(User):
+    hashed_password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+# -------------------------------
+# Оновлені схеми рецептів
+# -------------------------------
 class Recipe(RecipeBase):
     id: int
     category: Optional[Category] = None
     tags: List[Tag] = []
+    author: Optional[User] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

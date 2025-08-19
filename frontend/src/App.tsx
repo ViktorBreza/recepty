@@ -1,5 +1,8 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import Navigation from './components/Navigation';
 import HomePage from './pages/HomePage';
 import RecipesPage from './pages/RecipesPage';
 import AddRecipePage from './pages/AddRecipePage';
@@ -11,62 +14,103 @@ import CategoriesPage from './pages/CategoriesPage';
 import AddCategoryPage from './pages/AddCategoryPage';
 import EditCategoryPage from './pages/EditCategoryPage';
 import RecipeDetail from './components/RecipeDetail';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 function App() {
   return (
-    <Router>
-      <div className="container py-3">
-        <header>
-          <div className="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
-            <Link to="/" className="d-flex align-items-center text-dark text-decoration-none">
-              <span className="fs-4">🍳 Книга Рецептів</span>
-            </Link>
+    <AuthProvider>
+      <Router>
+        <div className="container py-3">
+          <Navigation />
 
-            <nav className="d-inline-flex mt-2 mt-md-0 ms-md-auto">
-              <NavLink to="/" className="me-3 py-2 text-dark text-decoration-none" end>
-                Головна
-              </NavLink>
-              <NavLink to="/recipes" className="me-3 py-2 text-dark text-decoration-none">
-                Рецепти
-              </NavLink>
-              <NavLink to="/categories" className="me-3 py-2 text-dark text-decoration-none">
-                Категорії
-              </NavLink>
-              <NavLink to="/tags" className="me-3 py-2 text-dark text-decoration-none">
-                Теги
-              </NavLink>
-              <NavLink to="/add-recipe" className="me-3 py-2 text-dark text-decoration-none">
-                Додати рецепт
-              </NavLink>
-            </nav>
-          </div>
-        </header>
+          <main>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/recipes" element={<RecipesPage />} />
+              <Route path="/recipes/:id" element={<RecipeDetail />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              
+              <Route 
+                path="/add-recipe" 
+                element={
+                  <ProtectedRoute>
+                    <AddRecipePage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/edit-recipe/:id" 
+                element={
+                  <ProtectedRoute>
+                    <EditRecipePage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/categories" 
+                element={
+                  <ProtectedRoute adminRequired>
+                    <CategoriesPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/add-category" 
+                element={
+                  <ProtectedRoute adminRequired>
+                    <AddCategoryPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/edit-category/:id" 
+                element={
+                  <ProtectedRoute adminRequired>
+                    <EditCategoryPage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/tags" 
+                element={
+                  <ProtectedRoute adminRequired>
+                    <TagsPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/add-tag" 
+                element={
+                  <ProtectedRoute adminRequired>
+                    <AddTagPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/edit-tag/:id" 
+                element={
+                  <ProtectedRoute adminRequired>
+                    <EditTagPage />
+                  </ProtectedRoute>
+                } 
+              />
+            </Routes>
+          </main>
 
-        <main>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/recipes" element={<RecipesPage />} />
-            <Route path="/add-recipe" element={<AddRecipePage />} />
-            <Route path="/edit-recipe/:id" element={<EditRecipePage />} />
-            <Route path="/categories" element={<CategoriesPage />} />
-            <Route path="/add-category" element={<AddCategoryPage />} />
-            <Route path="/edit-category/:id" element={<EditCategoryPage />} />
-            <Route path="/tags" element={<TagsPage />} />
-            <Route path="/add-tag" element={<AddTagPage />} />
-            <Route path="/edit-tag/:id" element={<EditTagPage />} />
-            <Route path="/recipes/:id" element={<RecipeDetail />} />
-          </Routes>
-        </main>
-
-        <footer className="pt-4 my-md-5 pt-md-5 border-top">
-          <div className="row">
-            <div className="col-12 col-md">
-              <small className="d-block mb-3 text-muted">© 2025</small>
+          <footer className="pt-4 my-md-5 pt-md-5 border-top">
+            <div className="row">
+              <div className="col-12 col-md">
+                <small className="d-block mb-3 text-muted">© 2025</small>
+              </div>
             </div>
-          </div>
-        </footer>
-      </div>
-    </Router>
+          </footer>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

@@ -4,10 +4,12 @@ import axios from 'axios';
 import { Recipe } from '../types';
 import PortionCalculator from './PortionCalculator';
 import CookingSteps from './CookingSteps';
+import { useAuth } from '../contexts/AuthContext';
 
 const RecipeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAuthenticated, token } = useAuth();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +33,8 @@ const RecipeDetail: React.FC = () => {
   const handleDelete = async () => {
     if (window.confirm('Ви впевнені, що хочете видалити цей рецепт?')) {
       try {
-        await axios.delete(`http://127.0.0.1:8000/recipes/${id}`);
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        await axios.delete(`http://127.0.0.1:8000/recipes/${id}`, { headers });
         navigate('/recipes');
       } catch (err) {
         console.error('Помилка при видаленні рецепта:', err);
@@ -59,14 +62,16 @@ const RecipeDetail: React.FC = () => {
           <h2>{recipe.title}</h2>
           <p className="lead">{recipe.description}</p>
         </div>
-        <div className="btn-group">
-          <Link to={`/edit-recipe/${recipe.id}`} className="btn btn-outline-primary">
-            Редагувати
-          </Link>
-          <button onClick={handleDelete} className="btn btn-outline-danger">
-            Видалити
-          </button>
-        </div>
+        {isAuthenticated && (
+          <div className="btn-group">
+            <Link to={`/edit-recipe/${recipe.id}`} className="btn btn-outline-primary">
+              Редагувати
+            </Link>
+            <button onClick={handleDelete} className="btn btn-outline-danger">
+              Видалити
+            </button>
+          </div>
+        )}
       </div>
       <hr />
 

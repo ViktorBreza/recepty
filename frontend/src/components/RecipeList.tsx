@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Recipe } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 interface RecipeListProps {
   onDelete?: () => void;
 }
 
 const RecipeList: React.FC<RecipeListProps> = ({ onDelete }) => {
+  const { isAuthenticated, token } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,8 @@ const RecipeList: React.FC<RecipeListProps> = ({ onDelete }) => {
   const handleDelete = async (id: number) => {
     if (window.confirm('Ви впевнені, що хочете видалити цей рецепт?')) {
       try {
-        await axios.delete(`http://127.0.0.1:8000/recipes/${id}`);
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        await axios.delete(`http://127.0.0.1:8000/recipes/${id}`, { headers });
         setRecipes(recipes.filter(recipe => recipe.id !== id));
         if (onDelete) onDelete();
       } catch (err) {
@@ -64,9 +67,11 @@ const RecipeList: React.FC<RecipeListProps> = ({ onDelete }) => {
     return (
       <div className="text-center">
         <p className="lead">Наразі рецептів немає.</p>
-        <Link to="/add-recipe" className="btn btn-primary">
-          Додати перший рецепт
-        </Link>
+        {isAuthenticated && (
+          <Link to="/add-recipe" className="btn btn-primary">
+            Додати перший рецепт
+          </Link>
+        )}
       </div>
     );
   }
@@ -97,18 +102,22 @@ const RecipeList: React.FC<RecipeListProps> = ({ onDelete }) => {
                   >
                     Переглянути
                   </Link>
-                  <Link 
-                    to={`/edit-recipe/${recipe.id}`} 
-                    className="btn btn-outline-secondary btn-sm"
-                  >
-                    Редагувати
-                  </Link>
-                  <button 
-                    onClick={() => handleDelete(recipe.id)}
-                    className="btn btn-outline-danger btn-sm"
-                  >
-                    Видалити
-                  </button>
+                  {isAuthenticated && (
+                    <>
+                      <Link 
+                        to={`/edit-recipe/${recipe.id}`} 
+                        className="btn btn-outline-secondary btn-sm"
+                      >
+                        Редагувати
+                      </Link>
+                      <button 
+                        onClick={() => handleDelete(recipe.id)}
+                        className="btn btn-outline-danger btn-sm"
+                      >
+                        Видалити
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

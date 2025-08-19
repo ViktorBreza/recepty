@@ -3,11 +3,12 @@ from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.database import Base, engine
-from app.routers import recipes, categories, tags, media
-
-Base.metadata.create_all(bind=engine)
+from app.routers import recipes, categories, tags, media, auth
 
 app = FastAPI(title="Recipe App API")
+
+# Створюємо таблиці після створення додатку
+Base.metadata.create_all(bind=engine)
 
 # CORS Middleware
 origins = [
@@ -33,6 +34,7 @@ def root():
     return RedirectResponse(url="/docs")
 
 # Routers
+app.include_router(auth.router)
 app.include_router(recipes.router)
 app.include_router(categories.router)
 app.include_router(tags.router)
