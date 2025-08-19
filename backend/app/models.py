@@ -27,7 +27,7 @@ class Recipe(Base):
     title = Column(String, index=True)
     description = Column(String, nullable=True)
     ingredients = Column(JSON, nullable=False)  # список {name, quantity, unit}
-    steps = Column(String)
+    steps = Column(JSON, nullable=False)  # або string або список CookingStep
     servings = Column(Integer)
     category_id = Column(Integer, ForeignKey("categories.id"))
     category = relationship("Category")

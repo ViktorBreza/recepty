@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Recipe } from '../types';
+import PortionCalculator from './PortionCalculator';
+import CookingSteps from './CookingSteps';
 
 const RecipeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +28,18 @@ const RecipeDetail: React.FC = () => {
     fetchRecipe();
   }, [id]);
 
+  const handleDelete = async () => {
+    if (window.confirm('Ви впевнені, що хочете видалити цей рецепт?')) {
+      try {
+        await axios.delete(`http://127.0.0.1:8000/recipes/${id}`);
+        navigate('/recipes');
+      } catch (err) {
+        console.error('Помилка при видаленні рецепта:', err);
+        alert('Не вдалося видалити рецепт');
+      }
+    }
+  };
+
   if (loading) {
     return <div>Завантаження...</div>;
   }
@@ -39,25 +54,52 @@ const RecipeDetail: React.FC = () => {
 
   return (
     <div>
-      <h2>{recipe.title}</h2>
-      <p className="lead">{recipe.description}</p>
+      <div className="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <h2>{recipe.title}</h2>
+          <p className="lead">{recipe.description}</p>
+        </div>
+        <div className="btn-group">
+          <Link to={`/edit-recipe/${recipe.id}`} className="btn btn-outline-primary">
+            Редагувати
+          </Link>
+          <button onClick={handleDelete} className="btn btn-outline-danger">
+            Видалити
+          </button>
+        </div>
+      </div>
       <hr />
 
       <div className="row">
-        <div className="col-md-6">
-          <h4>Інгредієнти</h4>
-          <ul className="list-group">
-            {recipe.ingredients.map((ingredient, index) => (
-              <li key={index} className="list-group-item">
-                {ingredient.name} - {ingredient.quantity} {ingredient.unit}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-2"><strong>Порції:</strong> {recipe.servings}</p>
+        <div className="col-lg-4 mb-4">
+          <div className="sticky-top" style={{ top: '20px' }}>
+            {/* Інгредієнти та калькулятор */}
+            <div className="mb-4">
+              <h4>Оригінальні інгредієнти</h4>
+              <ul className="list-group">
+                {recipe.ingredients.map((ingredient, index) => (
+                  <li key={index} className="list-group-item">
+                    <strong>{ingredient.name}</strong> - {ingredient.quantity} {ingredient.unit}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2">
+                <span className="badge bg-info">
+                  Оригінально на {recipe.servings} порцій
+                </span>
+              </p>
+            </div>
+
+            <PortionCalculator 
+              originalServings={recipe.servings}
+              ingredients={recipe.ingredients}
+            />
+          </div>
         </div>
-        <div className="col-md-6">
-          <h4>Кроки приготування</h4>
-          <p style={{ whiteSpace: 'pre-wrap' }}>{recipe.steps}</p>
+        
+        <div className="col-lg-8">
+          <h4 className="mb-4">Кроки приготування</h4>
+          <CookingSteps steps={recipe.steps} />
         </div>
       </div>
 

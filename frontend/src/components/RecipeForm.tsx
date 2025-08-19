@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Recipe, Category, Tag, Ingredient } from '../types';
+import { Recipe, Category, Tag, Ingredient, CookingStep } from '../types';
+import StepForm from './StepForm';
 
 interface RecipeFormData {
   title: string;
   description: string;
   servings: number;
   category_id: number;
-  steps: string;
+  steps: string | CookingStep[];
   ingredients: Ingredient[];
   tags: number[];
 }
@@ -26,10 +27,12 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
     description: '',
     servings: 4,
     category_id: 0,
-    steps: '',
+    steps: [{ id: 'step-1', stepNumber: 1, description: '', media: [] }],
     ingredients: [{ name: '', quantity: 1, unit: 'г' }],
     tags: [],
   });
+
+  const [useOldStepsFormat, setUseOldStepsFormat] = useState(false);
 
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [allTags, setAllTags] = useState<Tag[]>([]);
@@ -61,15 +64,32 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
         try {
           const response = await axios.get(`http://127.0.0.1:8000/recipes/${id}`);
           const recipe: Recipe = response.data;
+          // Перевіряємо формат кроків
+          let steps: string | CookingStep[];
+          let oldFormat = false;
+          
+          if (typeof recipe.steps === 'string') {
+            steps = recipe.steps;
+            oldFormat = true;
+          } else if (Array.isArray(recipe.steps)) {
+            steps = recipe.steps;
+          } else {
+            // Якщо невідомий формат, використовуємо старий
+            steps = '';
+            oldFormat = true;
+          }
+
           setFormData({
             title: recipe.title,
             description: recipe.description || '',
             servings: recipe.servings,
             category_id: recipe.category?.id || 0,
-            steps: recipe.steps,
+            steps: steps,
             ingredients: recipe.ingredients,
             tags: recipe.tags.map(tag => tag.id),
           });
+          
+          setUseOldStepsFormat(oldFormat);
         } catch (err) {
           setError('Не вдалося завантажити дані рецепта.');
         }
@@ -108,6 +128,73 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
         : [...prev.tags, tagId];
       return { ...prev, tags: newTags };
     });
+  };
+
+  const handleStepsFormatToggle = (useOldFormat: boolean) => {
+    setUseOldStepsFormat(useOldFormat);
+    if (useOldFormat) {
+      // Конвертуємо нові кроки в старий формат
+      if (Array.isArray(formData.steps)) {
+        const stepsText = formData.steps
+          .map((step, index) => `${index + 1}. ${step.description}`)
+          .join('\n');
+        setFormData(prev => ({ ...prev, steps: stepsText }));
+      }
+    } else {
+      // Конвертуємо старий формат в нові кроки
+      if (typeof formData.steps === 'string') {
+        const stepTexts = formData.steps
+          .split(/\n(?=\d+\.)/g)
+          .filter(step => step.trim().length > 0);
+        
+        const cookingSteps: CookingStep[] = stepTexts.map((stepText, index) => ({
+          id: `step-${index + 1}`,
+          stepNumber: index + 1,
+          description: stepText.replace(/^\d+\.\s*/, '').trim(),
+          media: []
+        }));
+
+        if (cookingSteps.length === 0) {
+          cookingSteps.push({ id: 'step-1', stepNumber: 1, description: '', media: [] });
+        }
+        
+        setFormData(prev => ({ ...prev, steps: cookingSteps }));
+      }
+    }
+  };
+
+  const handleStepUpdate = (stepIndex: number, updatedStep: CookingStep) => {
+    if (Array.isArray(formData.steps)) {
+      const newSteps = [...formData.steps];
+      newSteps[stepIndex] = updatedStep;
+      setFormData(prev => ({ ...prev, steps: newSteps }));
+    }
+  };
+
+  const handleAddStep = () => {
+    if (Array.isArray(formData.steps)) {
+      const newStepNumber = formData.steps.length + 1;
+      const newStep: CookingStep = {
+        id: `step-${newStepNumber}`,
+        stepNumber: newStepNumber,
+        description: '',
+        media: []
+      };
+      setFormData(prev => ({ ...prev, steps: [...formData.steps as CookingStep[], newStep] }));
+    }
+  };
+
+  const handleDeleteStep = (stepIndex: number) => {
+    if (Array.isArray(formData.steps) && formData.steps.length > 1) {
+      const newSteps = formData.steps.filter((_, index) => index !== stepIndex);
+      // Перенумеровуємо кроки
+      const renumberedSteps = newSteps.map((step, index) => ({
+        ...step,
+        stepNumber: index + 1,
+        id: `step-${index + 1}`
+      }));
+      setFormData(prev => ({ ...prev, steps: renumberedSteps }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -184,8 +271,58 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
       </div>
 
       <div className="mb-3">
-        <label htmlFor="steps" className="form-label">Кроки приготування</label>
-        <textarea className="form-control" id="steps" name="steps" rows={5} value={formData.steps} onChange={handleChange} required />
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <label className="form-label mb-0">Кроки приготування</label>
+          <div className="btn-group btn-group-sm" role="group">
+            <button
+              type="button"
+              className={`btn ${useOldStepsFormat ? 'btn-primary' : 'btn-outline-primary'}`}
+              onClick={() => handleStepsFormatToggle(true)}
+            >
+              Текст
+            </button>
+            <button
+              type="button"
+              className={`btn ${!useOldStepsFormat ? 'btn-primary' : 'btn-outline-primary'}`}
+              onClick={() => handleStepsFormatToggle(false)}
+            >
+              По пунктах з медіа
+            </button>
+          </div>
+        </div>
+
+        {useOldStepsFormat ? (
+          <textarea 
+            className="form-control" 
+            id="steps" 
+            name="steps" 
+            rows={5} 
+            value={typeof formData.steps === 'string' ? formData.steps : ''} 
+            onChange={handleChange} 
+            required 
+            placeholder="1. Перший крок приготування&#10;2. Другий крок приготування&#10;..."
+          />
+        ) : (
+          <div>
+            {Array.isArray(formData.steps) && formData.steps.map((step, index) => (
+              <StepForm
+                key={step.id || index}
+                step={step}
+                stepIndex={index}
+                onUpdate={(updatedStep) => handleStepUpdate(index, updatedStep)}
+                onDelete={() => handleDeleteStep(index)}
+              />
+            ))}
+            <button
+              type="button"
+              className="btn btn-outline-primary btn-sm"
+              onClick={handleAddStep}
+            >
+              <i className="bi bi-plus-circle me-1"></i>
+              Додати крок
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="mb-3">

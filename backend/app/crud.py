@@ -38,11 +38,17 @@ def get_recipe_by_id(db: Session, recipe_id: int):
 # CREATE новий рецепт
 # -------------------------------
 def create_recipe(db: Session, recipe: schemas.RecipeCreate):
+    # Обробляємо steps - може бути string або список CookingStep
+    steps_data = recipe.steps
+    if isinstance(recipe.steps, list):
+        # Конвертуємо CookingStep об'єкти в словники
+        steps_data = [step.model_dump() if hasattr(step, 'model_dump') else step for step in recipe.steps]
+    
     db_recipe = models.Recipe(
         title=recipe.title,
         description=recipe.description,
         ingredients=[ing.model_dump() for ing in recipe.ingredients],  # конвертуємо у список dict
-        steps=recipe.steps,
+        steps=steps_data,  # може бути string або список dict
         servings=recipe.servings,
         category_id=recipe.category_id
     )
@@ -66,10 +72,16 @@ def update_recipe(db: Session, recipe_id: int, recipe: schemas.RecipeCreate):
     if not db_recipe:
         return None
 
+    # Обробляємо steps - може бути string або список CookingStep
+    steps_data = recipe.steps
+    if isinstance(recipe.steps, list):
+        # Конвертуємо CookingStep об'єкти в словники
+        steps_data = [step.model_dump() if hasattr(step, 'model_dump') else step for step in recipe.steps]
+
     db_recipe.title = recipe.title
     db_recipe.description = recipe.description
     db_recipe.ingredients = [ing.model_dump() for ing in recipe.ingredients]
-    db_recipe.steps = recipe.steps
+    db_recipe.steps = steps_data
     db_recipe.servings = recipe.servings
     db_recipe.category_id = recipe.category_id
 
@@ -91,6 +103,22 @@ def delete_recipe(db: Session, recipe_id: int):
     db.commit()
     return True
 
+# ==========================
+# CRUD операції для категорій
+# ==========================
+
+def get_categories(db: Session):
+    """
+    Отримати всі категорії.
+    """
+    return db.query(models.Category).all()
+
+def get_category_by_id(db: Session, category_id: int):
+    """
+    Отримати категорію за ID.
+    """
+    return db.query(models.Category).filter(models.Category.id == category_id).first()
+
 # -------------------------------
 # CREATE нова категорія
 # -------------------------------
@@ -102,6 +130,47 @@ def create_category(db: Session, category: schemas.CategoryCreate):
     return db_category
 
 # -------------------------------
+# UPDATE категорія
+# -------------------------------
+def update_category(db: Session, category_id: int, category: schemas.CategoryCreate):
+    db_category = get_category_by_id(db, category_id)
+    if not db_category:
+        return None
+    
+    db_category.name = category.name
+    db.commit()
+    db.refresh(db_category)
+    return db_category
+
+# -------------------------------
+# DELETE категорія
+# -------------------------------
+def delete_category(db: Session, category_id: int):
+    db_category = get_category_by_id(db, category_id)
+    if not db_category:
+        return False
+    
+    db.delete(db_category)
+    db.commit()
+    return True
+
+# ==========================
+# CRUD операції для тегів
+# ==========================
+
+def get_tags(db: Session):
+    """
+    Отримати всі теги.
+    """
+    return db.query(models.Tag).all()
+
+def get_tag_by_id(db: Session, tag_id: int):
+    """
+    Отримати тег за ID.
+    """
+    return db.query(models.Tag).filter(models.Tag.id == tag_id).first()
+
+# -------------------------------
 # CREATE новий тег
 # -------------------------------
 def create_tag(db: Session, tag: schemas.TagCreate):
@@ -110,4 +179,29 @@ def create_tag(db: Session, tag: schemas.TagCreate):
     db.commit()
     db.refresh(db_tag)
     return db_tag
+
+# -------------------------------
+# UPDATE тег
+# -------------------------------
+def update_tag(db: Session, tag_id: int, tag: schemas.TagCreate):
+    db_tag = get_tag_by_id(db, tag_id)
+    if not db_tag:
+        return None
+    
+    db_tag.name = tag.name
+    db.commit()
+    db.refresh(db_tag)
+    return db_tag
+
+# -------------------------------
+# DELETE тег
+# -------------------------------
+def delete_tag(db: Session, tag_id: int):
+    db_tag = get_tag_by_id(db, tag_id)
+    if not db_tag:
+        return False
+    
+    db.delete(db_tag)
+    db.commit()
+    return True
 

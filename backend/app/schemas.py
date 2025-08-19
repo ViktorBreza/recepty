@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Union, Any
 
 # -------------------------------
 # Категорії та теги
@@ -12,8 +12,9 @@ class TagCreate(TagBase):
 
 class Tag(TagBase):
     id: int
+    
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class CategoryBase(BaseModel):
     name: str
@@ -23,8 +24,9 @@ class CategoryCreate(CategoryBase):
 
 class Category(CategoryBase):
     id: int
+    
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # -------------------------------
 # Структура інгредієнта
@@ -35,13 +37,32 @@ class Ingredient(BaseModel):
     unit: str  # наприклад: "г", "кг", "ст.л.", "ч.л.", "мл"
 
 # -------------------------------
+# Медіа для кроків
+# -------------------------------
+class StepMedia(BaseModel):
+    id: Optional[str] = None
+    type: str  # 'image' або 'video'
+    filename: str
+    url: str
+    alt: Optional[str] = None
+
+# -------------------------------
+# Крок приготування
+# -------------------------------
+class CookingStep(BaseModel):
+    id: Optional[str] = None
+    stepNumber: int
+    description: str
+    media: Optional[List[StepMedia]] = []
+
+# -------------------------------
 # Рецепти
 # -------------------------------
 class RecipeBase(BaseModel):
     title: str
     description: Optional[str] = None
     ingredients: List[Ingredient]
-    steps: str
+    steps: Union[str, List[CookingStep]]  # Підтримка старого та нового формату
     servings: int
     category_id: int
     tags: Optional[List[int]] = []
@@ -55,4 +76,4 @@ class Recipe(RecipeBase):
     tags: List[Tag] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True

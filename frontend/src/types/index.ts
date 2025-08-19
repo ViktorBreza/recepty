@@ -16,13 +16,30 @@ export interface Ingredient {
   unit: string;
 }
 
+// Медіа файл для кроку
+export interface StepMedia {
+  id?: string;
+  type: 'image' | 'video';
+  filename: string;
+  url: string;
+  alt?: string;
+}
+
+// Крок приготування
+export interface CookingStep {
+  id?: string;
+  stepNumber: number;
+  description: string;
+  media?: StepMedia[];
+}
+
 // Рецепт
 export interface Recipe {
   id: number;
   title: string;
   description: string | null;
   ingredients: Ingredient[];
-  steps: string;
+  steps: string | CookingStep[]; // Підтримуємо старий формат для зворотної сумісності
   servings: number;
   category: Category | null;
   tags: Tag[];
