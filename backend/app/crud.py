@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from app import models, schemas
 
@@ -13,7 +13,10 @@ def get_recipes(
     category_id: Optional[int] = None,
     tag_ids: Optional[List[int]] = None
 ):
-    query = db.query(models.Recipe)
+    query = db.query(models.Recipe).options(
+        joinedload(models.Recipe.category),
+        joinedload(models.Recipe.tags)
+    )
     if search:
         query = query.filter(models.Recipe.title.contains(search))
     if category_id:
@@ -26,7 +29,10 @@ def get_recipes(
 # GET рецепт по id
 # -------------------------------
 def get_recipe_by_id(db: Session, recipe_id: int):
-    return db.query(models.Recipe).filter(models.Recipe.id == recipe_id).first()
+    return db.query(models.Recipe).options(
+        joinedload(models.Recipe.category),
+        joinedload(models.Recipe.tags)
+    ).filter(models.Recipe.id == recipe_id).first()
 
 # -------------------------------
 # CREATE новий рецепт

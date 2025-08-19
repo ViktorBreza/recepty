@@ -51,7 +51,7 @@ class RecipeCreate(RecipeBase):
 
 class Recipe(RecipeBase):
     id: int
-    category: Category
+    category: Optional[Category] = None
     tags: List[Tag] = []
 
     class Config:
