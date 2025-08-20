@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CookingStep, StepMedia } from '../types';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
 
 interface StepFormProps {
   step: CookingStep;
@@ -34,7 +35,7 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
         formData.append('files', file);
       });
 
-      const response = await axios.post('http://127.0.0.1:8000/media/upload-step-files', formData, {
+      const response = await axios.post(`${API_ENDPOINTS.MEDIA_UPLOAD}/upload-step-files`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -45,7 +46,7 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
           id: `media-${Date.now()}-${Math.random()}`,
           type: fileInfo.type as 'image' | 'video',
           filename: fileInfo.filename,
-          url: `http://127.0.0.1:8000${fileInfo.url}`,
+          url: `http://127.0.0.1:8001${fileInfo.url}`,
           alt: `Крок ${step.stepNumber} - ${fileInfo.original_filename}`
         }));
 
@@ -72,7 +73,7 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
     
     try {
       // Видаляємо файл з сервера
-      await axios.delete(`http://127.0.0.1:8000/media/delete-step-file/${mediaToDelete.filename}`);
+      await axios.delete(`${API_ENDPOINTS.MEDIA_UPLOAD}/delete-step-file/${mediaToDelete.filename}`);
       
       // Видаляємо з локального стану
       const updatedMedia = step.media.filter((_, index) => index !== mediaIndex);

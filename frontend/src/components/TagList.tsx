@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Tag } from '../types';
+import { API_ENDPOINTS } from '../config/api';
 
 interface TagListProps {
   onDelete?: () => void;
@@ -15,7 +16,7 @@ const TagList: React.FC<TagListProps> = ({ onDelete }) => {
   const fetchTags = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://127.0.0.1:8000/tags/');
+      const response = await axios.get(`${API_ENDPOINTS.TAGS}/`);
       setTags(response.data);
     } catch (err) {
       setError('Не вдалося завантажити теги.');
@@ -32,7 +33,7 @@ const TagList: React.FC<TagListProps> = ({ onDelete }) => {
   const handleDelete = async (id: number) => {
     if (window.confirm('Ви впевнені, що хочете видалити цей тег?')) {
       try {
-        await axios.delete(`http://127.0.0.1:8000/tags/${id}`);
+        await axios.delete(`${API_ENDPOINTS.TAGS}/${id}`);
         setTags(tags.filter(tag => tag.id !== id));
         if (onDelete) onDelete();
       } catch (err) {

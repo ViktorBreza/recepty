@@ -75,7 +75,7 @@ async def save_recipe_step_file(file: UploadFile) -> dict:
             "filename": unique_filename,
             "original_filename": file.filename,
             "type": get_file_type(file.filename),
-            "url": f"/media/recipe_steps/{unique_filename}",
+            "url": f"/static/recipe_steps/{unique_filename}",
             "size": file_path.stat().st_size
         }
     
@@ -120,4 +120,4 @@ def delete_recipe_step_file(filename: str) -> bool:
 
 def get_file_url(filename: str) -> str:
     """Повертає URL для доступу до файлу"""
-    return f"/media/recipe_steps/{filename}"
+    return f"/static/recipe_steps/{filename}"

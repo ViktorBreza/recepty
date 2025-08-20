@@ -7,6 +7,7 @@ import CookingSteps from './CookingSteps';
 import StarRating from './StarRating';
 import CommentSystem from './CommentSystem';
 import { useAuth } from '../contexts/AuthContext';
+import { API_ENDPOINTS } from '../config/api';
 
 const RecipeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,7 +20,7 @@ const RecipeDetail: React.FC = () => {
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/recipes/${id}`);
+        const response = await axios.get(`${API_ENDPOINTS.RECIPES}/${id}`);
         setRecipe(response.data);
       } catch (err) {
         setError('Не вдалося завантажити рецепт.');
@@ -36,7 +37,7 @@ const RecipeDetail: React.FC = () => {
     if (window.confirm('Ви впевнені, що хочете видалити цей рецепт?')) {
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        await axios.delete(`http://127.0.0.1:8000/recipes/${id}`, { headers });
+        await axios.delete(`${API_ENDPOINTS.RECIPES}/${id}`, { headers });
         navigate('/recipes');
       } catch (err) {
         console.error('Помилка при видаленні рецепта:', err);

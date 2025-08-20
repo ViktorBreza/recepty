@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(taskkill:*)",
+      "Bash(wmic process where processid=14488 get name,commandline:*)",
+      "Bash(wmic process:*)",
+      "Bash(python:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

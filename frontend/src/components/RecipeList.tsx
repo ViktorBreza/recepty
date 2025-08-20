@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Recipe } from '../types';
 import StarRating from './StarRating';
 import { useAuth } from '../contexts/AuthContext';
+import { API_ENDPOINTS } from '../config/api';
 
 interface RecipeListProps {
   onDelete?: () => void;
@@ -18,7 +19,7 @@ const RecipeList: React.FC<RecipeListProps> = ({ onDelete }) => {
   const fetchRecipes = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://127.0.0.1:8000/recipes/');
+      const response = await axios.get(`${API_ENDPOINTS.RECIPES}/`);
       setRecipes(response.data);
     } catch (err) {
       setError('Не вдалося завантажити рецепти.');
@@ -36,7 +37,7 @@ const RecipeList: React.FC<RecipeListProps> = ({ onDelete }) => {
     if (window.confirm('Ви впевнені, що хочете видалити цей рецепт?')) {
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        await axios.delete(`http://127.0.0.1:8000/recipes/${id}`, { headers });
+        await axios.delete(`${API_ENDPOINTS.RECIPES}/${id}`, { headers });
         setRecipes(recipes.filter(recipe => recipe.id !== id));
         if (onDelete) onDelete();
       } catch (err) {

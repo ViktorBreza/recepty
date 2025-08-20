@@ -25,9 +25,9 @@ const CommentSystem: React.FC<CommentSystemProps> = ({ recipeId }) => {
       try {
         const response = await axios.get(`${API_ENDPOINTS.COMMENTS}/${recipeId}`);
         setComments(response.data);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Помилка завантаження коментарів:', error);
-        if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+        if (error?.code === 'ECONNREFUSED' || error?.code === 'ERR_NETWORK') {
           console.error('Backend сервер не запущений! Запустіть: python -m uvicorn app.main:app --reload --port 8001');
         }
         // При помилці встановлюємо порожний масив

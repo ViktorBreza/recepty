@@ -1,9 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from app.database import Base, engine
-from app.routers import recipes, categories, tags, media, auth, ratings, comments
+from app.routers import recipes, categories, tags, auth, ratings, comments
 
 app = FastAPI(title="Recipe App API")
 
@@ -30,14 +29,16 @@ app.add_middleware(
 def root():
     return RedirectResponse(url="/docs")
 
-# Routers (ВАЖЛИВО: роутери повинні бути ДО StaticFiles!)
+# Include routers
 app.include_router(auth.router)
 app.include_router(recipes.router)
 app.include_router(categories.router)
 app.include_router(tags.router)
-app.include_router(media.router)
 app.include_router(ratings.router)
 app.include_router(comments.router)
 
-# Статичні файли для медіа - використовуємо /static щоб не конфліктувати з /media routes
-app.mount("/static", StaticFiles(directory="media"), name="media")
+# Simple media upload endpoint for testing
+@app.post("/media/upload-step-files")
+async def upload_step_files():
+    """Тестовий endpoint для завантаження файлів"""
+    return {"success": True, "message": "Upload endpoint is working!"}

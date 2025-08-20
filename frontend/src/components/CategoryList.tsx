@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Category } from '../types';
+import { API_ENDPOINTS } from '../config/api';
 
 interface CategoryListProps {
   onDelete?: () => void;
@@ -15,7 +16,7 @@ const CategoryList: React.FC<CategoryListProps> = ({ onDelete }) => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://127.0.0.1:8000/categories/');
+      const response = await axios.get(`${API_ENDPOINTS.CATEGORIES}/`);
       setCategories(response.data);
     } catch (err) {
       setError('Не вдалося завантажити категорії.');
@@ -32,7 +33,7 @@ const CategoryList: React.FC<CategoryListProps> = ({ onDelete }) => {
   const handleDelete = async (id: number) => {
     if (window.confirm('Ви впевнені, що хочете видалити цю категорію? Всі рецепти з цією категорією залишаться без категорії.')) {
       try {
-        await axios.delete(`http://127.0.0.1:8000/categories/${id}`);
+        await axios.delete(`${API_ENDPOINTS.CATEGORIES}/${id}`);
         setCategories(categories.filter(category => category.id !== id));
         if (onDelete) onDelete();
       } catch (err) {

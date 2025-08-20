@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Recipe, Category, Tag, Ingredient, CookingStep } from '../types';
 import StepForm from './StepForm';
+import { API_ENDPOINTS } from '../config/api';
 
 interface RecipeFormData {
   title: string;
@@ -43,8 +44,8 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
     const fetchMetadata = async () => {
       try {
         const [categoriesRes, tagsRes] = await Promise.all([
-          axios.get('http://127.0.0.1:8000/categories/'),
-          axios.get('http://127.0.0.1:8000/tags/'),
+          axios.get(`${API_ENDPOINTS.CATEGORIES}/`),
+          axios.get(`${API_ENDPOINTS.TAGS}/`),
         ]);
         setAllCategories(categoriesRes.data);
         setAllTags(tagsRes.data);
@@ -62,7 +63,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
     if (isEditMode && id) {
       const fetchRecipe = async () => {
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/recipes/${id}`);
+          const response = await axios.get(`${API_ENDPOINTS.RECIPES}/${id}`);
           const recipe: Recipe = response.data;
           // Перевіряємо формат кроків
           let steps: string | CookingStep[];
@@ -208,9 +209,9 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
     try {
       let response;
       if (isEditMode) {
-        response = await axios.put(`http://127.0.0.1:8000/recipes/${id}`, formData);
+        response = await axios.put(`${API_ENDPOINTS.RECIPES}/${id}`, formData);
       } else {
-        response = await axios.post('http://127.0.0.1:8000/recipes/', formData);
+        response = await axios.post(`${API_ENDPOINTS.RECIPES}/`, formData);
       }
       navigate(`/recipes/${response.data.id}`);
     } catch (err) {

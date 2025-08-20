@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Tag } from '../types';
+import { API_ENDPOINTS } from '../config/api';
 
 interface TagFormData {
   name: string;
@@ -27,7 +28,7 @@ const TagForm: React.FC<TagFormProps> = ({ isEditMode = false }) => {
       const fetchTag = async () => {
         try {
           setLoading(true);
-          const response = await axios.get(`http://127.0.0.1:8000/tags/${id}`);
+          const response = await axios.get(`${API_ENDPOINTS.TAGS}/${id}`);
           const tag: Tag = response.data;
           setFormData({
             name: tag.name,
@@ -62,9 +63,9 @@ const TagForm: React.FC<TagFormProps> = ({ isEditMode = false }) => {
     try {
       let response;
       if (isEditMode) {
-        response = await axios.put(`http://127.0.0.1:8000/tags/${id}`, formData);
+        response = await axios.put(`${API_ENDPOINTS.TAGS}/${id}`, formData);
       } else {
-        response = await axios.post('http://127.0.0.1:8000/tags/', formData);
+        response = await axios.post(`${API_ENDPOINTS.TAGS}/`, formData);
       }
       navigate('/tags');
     } catch (err: any) {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Category } from '../types';
+import { API_ENDPOINTS } from '../config/api';
 
 interface CategoryFormData {
   name: string;
@@ -27,7 +28,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ isEditMode = false }) => {
       const fetchCategory = async () => {
         try {
           setLoading(true);
-          const response = await axios.get(`http://127.0.0.1:8000/categories/${id}`);
+          const response = await axios.get(`${API_ENDPOINTS.CATEGORIES}/${id}`);
           const category: Category = response.data;
           setFormData({
             name: category.name,
@@ -62,9 +63,9 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ isEditMode = false }) => {
     try {
       let response;
       if (isEditMode) {
-        response = await axios.put(`http://127.0.0.1:8000/categories/${id}`, formData);
+        response = await axios.put(`${API_ENDPOINTS.CATEGORIES}/${id}`, formData);
       } else {
-        response = await axios.post('http://127.0.0.1:8000/categories/', formData);
+        response = await axios.post(`${API_ENDPOINTS.CATEGORIES}/`, formData);
       }
       navigate('/categories');
     } catch (err: any) {
