@@ -30,20 +30,12 @@ def get_recipes(
 # GET рецепт по id
 # -------------------------------
 def get_recipe_by_id(db: Session, recipe_id: int):
-    try:
-        return db.query(models.Recipe).options(
-            joinedload(models.Recipe.category),
-            joinedload(models.Recipe.tags),
-            joinedload(models.Recipe.ratings),
-            joinedload(models.Recipe.comments)
-        ).filter(models.Recipe.id == recipe_id).first()
-    except Exception as e:
-        # Fallback без ratings та comments якщо є проблеми з зв'язками
-        print(f"Error loading with relationships, falling back: {e}")
-        return db.query(models.Recipe).options(
-            joinedload(models.Recipe.category),
-            joinedload(models.Recipe.tags)
-        ).filter(models.Recipe.id == recipe_id).first()
+    return db.query(models.Recipe).options(
+        joinedload(models.Recipe.category),
+        joinedload(models.Recipe.tags),
+        joinedload(models.Recipe.ratings),
+        joinedload(models.Recipe.comments)
+    ).filter(models.Recipe.id == recipe_id).first()
 
 # -------------------------------
 # CREATE новий рецепт

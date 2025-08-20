@@ -50,6 +50,9 @@ const StarRating: React.FC<StarRatingProps> = ({
         setUserRating(userRatingResponse.data.rating);
       } catch (error) {
         console.error('Помилка завантаження рейтингу:', error);
+        if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+          console.error('Backend сервер не запущений! Запустіть: python -m uvicorn app.main:app --reload --port 8001');
+        }
         // Встановлюємо порожні дані при помилці (наприклад, коли backend не запущений)
         setStats({ average_rating: null, total_ratings: 0, total_comments: 0 });
         setUserRating(null);

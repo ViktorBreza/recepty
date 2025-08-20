@@ -27,7 +27,10 @@ const CommentSystem: React.FC<CommentSystemProps> = ({ recipeId }) => {
         setComments(response.data);
       } catch (error) {
         console.error('Помилка завантаження коментарів:', error);
-        // При помилці встановлюємо порожній масив
+        if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+          console.error('Backend сервер не запущений! Запустіть: python -m uvicorn app.main:app --reload --port 8001');
+        }
+        // При помилці встановлюємо порожний масив
         setComments([]);
       } finally {
         setLoading(false);

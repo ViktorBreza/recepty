@@ -47,17 +47,11 @@ def get_recipe_rating_stats(recipe_id: int, db: Session = Depends(get_db)):
     """
     Отримати статистику рейтингу рецепту.
     """
-    print(f"Searching for recipe with ID: {recipe_id}")
     recipe = crud.get_recipe_by_id(db, recipe_id)
-    print(f"Recipe found: {recipe is not None}")
     if not recipe:
-        print("Recipe not found, raising 404")
         raise HTTPException(status_code=404, detail="Рецепт не знайдено")
     
-    print(f"Getting stats for recipe: {recipe.title}")
-    stats = crud.get_recipe_stats(db, recipe_id)
-    print(f"Stats: {stats}")
-    return stats
+    return crud.get_recipe_stats(db, recipe_id)
 
 @router.get("/{recipe_id}/user-rating")
 def get_user_recipe_rating(
