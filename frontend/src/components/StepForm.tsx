@@ -47,7 +47,7 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
           type: fileInfo.type as 'image' | 'video',
           filename: fileInfo.filename,
           url: `http://127.0.0.1:8001${fileInfo.url}`,
-          alt: `Крок ${step.stepNumber} - ${fileInfo.original_filename}`
+          alt: `Step ${step.stepNumber} - ${fileInfo.original_filename}`
         }));
 
         const updatedStep: CookingStep = {
@@ -57,11 +57,11 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
         onUpdate(updatedStep);
       }
     } catch (error: any) {
-      console.error('Помилка завантаження файлів:', error);
+      console.error('File upload error:', error);
       setUploadError(error.response?.data?.detail || 'Не вдалося завантажити файли');
     } finally {
       setIsUploading(false);
-      // Очищуємо input
+      // Clear input
       e.target.value = '';
     }
   };
@@ -72,10 +72,10 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
     const mediaToDelete = step.media[mediaIndex];
     
     try {
-      // Видаляємо файл з сервера
+      // Delete file from server
       await axios.delete(`${API_ENDPOINTS.MEDIA_UPLOAD}/delete-step-file/${mediaToDelete.filename}`);
       
-      // Видаляємо з локального стану
+      // Remove from local state
       const updatedMedia = step.media.filter((_, index) => index !== mediaIndex);
       const updatedStep: CookingStep = {
         ...step,
@@ -83,8 +83,8 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
       };
       onUpdate(updatedStep);
     } catch (error) {
-      console.error('Помилка видалення файлу:', error);
-      // Все одно видаляємо з UI, навіть якщо не вдалося видалити з сервера
+      console.error('File deletion error:', error);
+      // Still remove from UI, even if server deletion failed
       const updatedMedia = step.media.filter((_, index) => index !== mediaIndex);
       const updatedStep: CookingStep = {
         ...step,
@@ -112,7 +112,7 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
           </button>
         </div>
 
-        {/* Опис кроку */}
+        {/* Step description */}
         <div className="mb-3">
           <label className="form-label">Опис кроку *</label>
           <textarea
@@ -120,16 +120,16 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
             rows={3}
             value={step.description}
             onChange={handleDescriptionChange}
-            placeholder="Опишіть що потрібно зробити на цьому кроці..."
+            placeholder="Опишіть, що потрібно зробити в цьому кроці..."
             required
           />
         </div>
 
-        {/* Завантаження медіа */}
+        {/* Media upload */}
         <div className="mb-3">
           <label className="form-label">
-            Фото або відео (необов'язково)
-            <small className="text-muted ms-2">Максимум 10MB на файл, до 5 файлів</small>
+            Фото або відео (опціонально)
+            <small className="text-muted ms-2">Максимум 10МБ на файл, до 5 файлів</small>
           </label>
           <input
             type="file"
@@ -146,7 +146,7 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
           )}
         </div>
 
-        {/* Відображення завантажених медіа */}
+        {/* Display uploaded media */}
         {step.media && step.media.length > 0 && (
           <div className="uploaded-media">
             <label className="form-label">Завантажені файли:</label>
@@ -193,7 +193,7 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
         {isUploading && (
           <div className="text-center">
             <div className="spinner-border spinner-border-sm me-2" role="status"></div>
-            <small>Завантажуємо файли...</small>
+            <small>Завантаження файлів...</small>
           </div>
         )}
       </div>

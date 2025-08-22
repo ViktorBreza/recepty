@@ -8,12 +8,12 @@ get_db = database.get_db
 
 @router.get("/", response_model=List[schemas.Tag])
 def read_tags(db: Session = Depends(get_db)):
-    """Отримує список всіх тегів (доступно всім)"""
+    """Gets list of all tags (available to all)"""
     return crud.get_tags(db)
 
 @router.get("/{tag_id}", response_model=schemas.Tag)
 def read_tag(tag_id: int, db: Session = Depends(get_db)):
-    """Отримує тег за ID (доступно всім)"""
+    """Gets tag by ID (available to all)"""
     db_tag = crud.get_tag_by_id(db, tag_id)
     if not db_tag:
         raise HTTPException(status_code=404, detail="Tag not found")
@@ -25,7 +25,7 @@ def create_tag(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin_user)
 ):
-    """Створює новий тег (тільки для адмінів)"""
+    """Creates new tag (admin only)"""
     return crud.create_tag(db, tag)
 
 @router.put("/{tag_id}", response_model=schemas.Tag)
@@ -35,7 +35,7 @@ def update_tag(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin_user)
 ):
-    """Оновлює тег (тільки для адмінів)"""
+    """Updates tag (admin only)"""
     db_tag = crud.update_tag(db, tag_id, tag)
     if not db_tag:
         raise HTTPException(status_code=404, detail="Tag not found")
@@ -47,7 +47,7 @@ def delete_tag(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin_user)
 ):
-    """Видаляє тег (тільки для адмінів)"""
+    """Deletes tag (admin only)"""
     success = crud.delete_tag(db, tag_id)
     if not success:
         raise HTTPException(status_code=404, detail="Tag not found")

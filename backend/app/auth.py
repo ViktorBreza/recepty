@@ -8,27 +8,27 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, schemas
 
-# Конфігурація
+# Configuration
 SECRET_KEY = "your-super-secret-key-change-this-in-production"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 24  # 30 днів
+ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 24  # 30 days
 
-# Контекст для хешування паролів
+# Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# HTTP Bearer для отримання токену з заголовків
+# HTTP Bearer for getting token from headers
 security = HTTPBearer()
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Перевіряє пароль"""
+    """Verifies password"""
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password: str) -> str:
-    """Хешує пароль"""
+    """Hashes password"""
     return pwd_context.hash(password)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    """Створює JWT токен"""
+    """Creates JWT token"""
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -40,7 +40,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 def verify_token(token: str) -> Optional[schemas.TokenData]:
-    """Перевіряє JWT токен"""
+    """Verifies JWT token"""
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -51,15 +51,15 @@ def verify_token(token: str) -> Optional[schemas.TokenData]:
         return None
 
 def get_user_by_username(db: Session, username: str) -> Optional[models.User]:
-    """Отримує користувача за ім'ям"""
+    """Gets user by username"""
     return db.query(models.User).filter(models.User.username == username).first()
 
 def get_user_by_email(db: Session, email: str) -> Optional[models.User]:
-    """Отримує користувача за email"""
+    """Gets user by email"""
     return db.query(models.User).filter(models.User.email == email).first()
 
 def authenticate_user(db: Session, username: str, password: str) -> Optional[models.User]:
-    """Аутентифікує користувача"""
+    """Authenticates user"""
     user = get_user_by_username(db, username)
     if not user:
         return None
@@ -71,7 +71,7 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ) -> models.User:
-    """Отримує поточного користувача з токену"""
+    """Gets current user from token"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -89,13 +89,13 @@ def get_current_user(
     return user
 
 def get_current_active_user(current_user: models.User = Depends(get_current_user)) -> models.User:
-    """Перевіряє чи активний поточний користувач"""
+    """Checks if current user is active"""
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 def get_current_admin_user(current_user: models.User = Depends(get_current_active_user)) -> models.User:
-    """Перевіряє чи поточний користувач є адміном"""
+    """Checks if current user is admin"""
     if not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -103,12 +103,12 @@ def get_current_admin_user(current_user: models.User = Depends(get_current_activ
         )
     return current_user
 
-# Optional dependency - не викидає помилку якщо користувач не авторизований
+# Optional dependency - doesn't throw error if user is not authorized
 def get_current_user_optional(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False)),
     db: Session = Depends(get_db)
 ) -> Optional[models.User]:
-    """Отримує поточного користувача або None якщо не авторизований"""
+    """Gets current user or None if not authorized"""
     if not credentials:
         return None
     

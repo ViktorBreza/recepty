@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Безпечний запуск backend сервера з автоматичним звільненням порту
+Safe backend server startup with automatic port cleanup
 """
 
 import os
@@ -12,7 +12,7 @@ import psutil
 from pathlib import Path
 
 def check_port_in_use(port):
-    """Перевіряє чи зайнятий порт"""
+    """Checks if port is in use"""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.bind(('127.0.0.1', port))
@@ -21,7 +21,7 @@ def check_port_in_use(port):
             return True
 
 def find_process_using_port(port):
-    """Знаходить процеси, які використовують порт"""
+    """Finds processes using the port"""
     processes = []
     for proc in psutil.process_iter(['pid', 'name', 'connections']):
         try:
@@ -34,84 +34,84 @@ def find_process_using_port(port):
     return processes
 
 def kill_processes_on_port(port):
-    """Вбиває процеси на вказаному порту"""
+    """Kills processes on the specified port"""
     processes = find_process_using_port(port)
     
     if not processes:
-        print(f"✅ Порт {port} вільний")
+        print(f"✅ Port {port} is free")
         return True
     
-    print(f"⚠️  Знайдено {len(processes)} процес(ів) на порту {port}")
+    print(f"⚠️  Found {len(processes)} process(es) on port {port}")
     
     for proc_info in processes:
         try:
             pid = proc_info['pid']
             name = proc_info['name']
-            print(f"  Вбиваємо процес: {name} (PID: {pid})")
+            print(f"  Killing process: {name} (PID: {pid})")
             
             proc = psutil.Process(pid)
             proc.terminate()
             
-            # Чекаємо до 3 секунд на завершення
+            # Wait up to 3 seconds for termination
             try:
                 proc.wait(timeout=3)
             except psutil.TimeoutExpired:
-                print(f"  Примусове завершення процесу {pid}")
+                print(f"  Force killing process {pid}")
                 proc.kill()
                 
         except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-            print(f"  ❌ Не вдалося завершити процес {pid}: {e}")
+            print(f"  ❌ Failed to terminate process {pid}: {e}")
     
-    # Перевіряємо чи порт звільнився
+    # Check if port was freed
     time.sleep(1)
     if check_port_in_use(port):
-        print(f"❌ Не вдалося звільнити порт {port}")
+        print(f"❌ Failed to free port {port}")
         return False
     else:
-        print(f"✅ Порт {port} звільнено")
+        print(f"✅ Port {port} freed")
         return True
 
 def start_uvicorn():
-    """Запускає uvicorn сервер"""
+    """Starts uvicorn server"""
     PORT = 8001
     
     print("=" * 50)
-    print("  БЕЗПЕЧНИЙ ЗАПУСК BACKEND СЕРВЕРА")
+    print("  SAFE BACKEND SERVER STARTUP")
     print("=" * 50)
     print()
     
-    # Перевіряємо чи ми в правильній директорії
+    # Check if we're in the correct directory
     if not Path("app/main.py").exists():
-        print("❌ Файл app/main.py не знайдено")
-        print(f"Поточна директорія: {os.getcwd()}")
-        print("Запустіть скрипт з директорії backend")
+        print("❌ File app/main.py not found")
+        print(f"Current directory: {os.getcwd()}")
+        print("Run script from backend directory")
         return 1
     
-    print("✅ Знайдено app/main.py")
+    print("✅ Found app/main.py")
     print()
     
-    # Перевіряємо та звільняємо порт
-    print(f"1. Перевіряємо порт {PORT}...")
+    # Check and free port
+    print(f"1. Checking port {PORT}...")
     if not kill_processes_on_port(PORT):
-        print("❌ Не вдалося звільнити порт. Спробуйте перезапустити комп'ютер.")
+        print("❌ Failed to free port. Try restarting computer.")
         return 1
     
     print()
-    print(f"2. Запуск сервера на порту {PORT}...")
-    print(f"Backend буде доступний на: http://127.0.0.1:{PORT}")
-    print(f"Документація API: http://127.0.0.1:{PORT}/docs")
+    print(f"2. Starting server on port {PORT}...")
+    print(f"Backend will be available at: http://127.0.0.1:{PORT}")
+    print(f"API documentation: http://127.0.0.1:{PORT}/docs")
     print()
-    print("Для зупинки сервера натисніть Ctrl+C")
+    print("Press Ctrl+C to stop the server")
     print()
     
     try:
-        # Запускаємо uvicorn
+        # Start uvicorn
         cmd = [sys.executable, "-m", "uvicorn", "app.main:app", "--reload", "--port", str(PORT)]
         subprocess.run(cmd)
     except KeyboardInterrupt:
-        print("\n🛑 Сервер зупинено користувачем")
+        print("\n🛑 Server stopped by user")
     except Exception as e:
-        print(f"❌ Помилка запуску сервера: {e}")
+        print(f"❌ Server startup error: {e}")
         return 1
     
     return 0

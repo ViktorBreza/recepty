@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { API_ENDPOINTS } from '../config/api';
+import { logger } from '../utils/logger';
 
 interface User {
   id: number;
@@ -61,7 +62,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setToken(null);
           }
         } catch (error) {
-          console.error('Error initializing auth:', error);
+          logger.logError(error as Error, 'AuthContext.initializeAuth');
           localStorage.removeItem('token');
           setToken(null);
         }
@@ -73,56 +74,77 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = async (username: string, password: string): Promise<void> => {
-    const response = await fetch(API_ENDPOINTS.AUTH_LOGIN, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      logger.logUserAction('login_attempt', { username });
+      
+      const response = await fetch(API_ENDPOINTS.AUTH_LOGIN, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Login failed');
-    }
+      if (!response.ok) {
+        const errorData = await response.json();
+        logger.logUserAction('login_failed', { username, error: errorData.detail });
+        throw new Error(errorData.detail || 'Login failed');
+      }
 
-    const data = await response.json();
-    const newToken = data.access_token;
-    
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
+      const data = await response.json();
+      const newToken = data.access_token;
+      
+      localStorage.setItem('token', newToken);
+      setToken(newToken);
+      
+      logger.logUserAction('login_success', { username });
 
-    const userResponse = await fetch(API_ENDPOINTS.AUTH_ME, {
-      headers: {
-        'Authorization': `Bearer ${newToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
+      const userResponse = await fetch(API_ENDPOINTS.AUTH_ME, {
+        headers: {
+          'Authorization': `Bearer ${newToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-    if (userResponse.ok) {
-      const userData = await userResponse.json();
-      setUser(userData);
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        setUser(userData);
+        logger.logUserAction('user_data_loaded', { userId: userData.id });
+      }
+    } catch (error) {
+      logger.logError(error as Error, 'AuthContext.login');
+      throw error;
     }
   };
 
   const register = async (username: string, email: string, password: string): Promise<void> => {
-    const response = await fetch(API_ENDPOINTS.AUTH_REGISTER, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, email, password }),
-    });
+    try {
+      logger.logUserAction('register_attempt', { username, email });
+      
+      const response = await fetch(API_ENDPOINTS.AUTH_REGISTER, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Registration failed');
+      if (!response.ok) {
+        const errorData = await response.json();
+        logger.logUserAction('register_failed', { username, email, error: errorData.detail });
+        throw new Error(errorData.detail || 'Registration failed');
+      }
+
+      logger.logUserAction('register_success', { username, email });
+      await login(username, password);
+    } catch (error) {
+      logger.logError(error as Error, 'AuthContext.register');
+      throw error;
     }
-
-    await login(username, password);
   };
 
   const logout = () => {
+    logger.logUserAction('logout', { userId: user?.id });
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);

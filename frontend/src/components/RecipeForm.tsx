@@ -29,7 +29,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
     servings: 4,
     category_id: 0,
     steps: [{ id: 'step-1', stepNumber: 1, description: '', media: [] }],
-    ingredients: [{ name: '', quantity: 1, unit: 'г' }],
+    ingredients: [{ name: '', quantity: 1, unit: 'g' }],
     tags: [],
   });
 
@@ -40,7 +40,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Завантажуємо категорії та теги для випадаючих списків та чекбоксів
+    // Load categories and tags for dropdown lists and checkboxes
     const fetchMetadata = async () => {
       try {
         const [categoriesRes, tagsRes] = await Promise.all([
@@ -59,13 +59,13 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
 
     fetchMetadata();
 
-    // Якщо це режим редагування, завантажуємо дані рецепта
+    // If this is edit mode, load recipe data
     if (isEditMode && id) {
       const fetchRecipe = async () => {
         try {
           const response = await axios.get(`${API_ENDPOINTS.RECIPES}/${id}`);
           const recipe: Recipe = response.data;
-          // Перевіряємо формат кроків
+          // Check the format of steps
           let steps: string | CookingStep[];
           let oldFormat = false;
           
@@ -75,7 +75,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
           } else if (Array.isArray(recipe.steps)) {
             steps = recipe.steps;
           } else {
-            // Якщо невідомий формат, використовуємо старий
+            // If unknown format, use the old format
             steps = '';
             oldFormat = true;
           }
@@ -92,7 +92,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
           
           setUseOldStepsFormat(oldFormat);
         } catch (err) {
-          setError('Не вдалося завантажити дані рецепта.');
+          setError('Не вдалося завантажити дані рецепту.');
         }
       };
       fetchRecipe();
@@ -113,7 +113,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
   const addIngredient = () => {
     setFormData(prev => ({
       ...prev,
-      ingredients: [...prev.ingredients, { name: '', quantity: 1, unit: 'г' }],
+      ingredients: [...prev.ingredients, { name: '', quantity: 1, unit: 'g' }],
     }));
   };
 
@@ -134,7 +134,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
   const handleStepsFormatToggle = (useOldFormat: boolean) => {
     setUseOldStepsFormat(useOldFormat);
     if (useOldFormat) {
-      // Конвертуємо нові кроки в старий формат
+      // Convert new steps to old format
       if (Array.isArray(formData.steps)) {
         const stepsText = formData.steps
           .map((step, index) => `${index + 1}. ${step.description}`)
@@ -142,7 +142,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
         setFormData(prev => ({ ...prev, steps: stepsText }));
       }
     } else {
-      // Конвертуємо старий формат в нові кроки
+      // Convert old format to new steps
       if (typeof formData.steps === 'string') {
         const stepTexts = formData.steps
           .split(/\n(?=\d+\.)/g)
@@ -188,7 +188,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
   const handleDeleteStep = (stepIndex: number) => {
     if (Array.isArray(formData.steps) && formData.steps.length > 1) {
       const newSteps = formData.steps.filter((_, index) => index !== stepIndex);
-      // Перенумеровуємо кроки
+      // Renumber steps
       const renumberedSteps = newSteps.map((step, index) => ({
         ...step,
         stepNumber: index + 1,
@@ -215,7 +215,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
       }
       navigate(`/recipes/${response.data.id}`);
     } catch (err) {
-      setError('Сталася помилка при збереженні рецепта.');
+      setError('Виникла помилка при збереженні рецепту.');
       console.error(err);
     }
   };
@@ -287,7 +287,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ isEditMode = false }) => {
               className={`btn ${!useOldStepsFormat ? 'btn-primary' : 'btn-outline-primary'}`}
               onClick={() => handleStepsFormatToggle(false)}
             >
-              По пунктах з медіа
+              Покроково з медіа
             </button>
           </div>
         </div>

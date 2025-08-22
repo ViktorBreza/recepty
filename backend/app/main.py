@@ -1,14 +1,33 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.database import Base, engine
 from app.routers import recipes, categories, tags, media, auth, ratings, comments
+from app.logger import app_logger, log_request
+import time
 
 app = FastAPI(title="Recipe App API")
 
-# Створюємо таблиці після створення додатку
+# Create database tables after app creation
 Base.metadata.create_all(bind=engine)
+
+# Middleware for request logging
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    
+    # Log request start
+    log_request(request.method, str(request.url))
+    
+    response = await call_next(request)
+    
+    # Log execution time
+    process_time = time.time() - start_time
+    if process_time > 1.0:  # Log only slow requests
+        app_logger.warning(f"Slow request: {request.method} {request.url} took {process_time:.2f}s")
+    
+    return response
 
 # CORS Middleware
 origins = [
@@ -30,7 +49,7 @@ app.add_middleware(
 def root():
     return RedirectResponse(url="/docs")
 
-# Routers (ВАЖЛИВО: роутери повинні бути ДО StaticFiles!)
+# Routers (IMPORTANT: routers must be BEFORE StaticFiles!)
 app.include_router(auth.router)
 app.include_router(recipes.router)
 app.include_router(categories.router)
@@ -39,5 +58,8 @@ app.include_router(media.router)
 app.include_router(ratings.router)
 app.include_router(comments.router)
 
-# Статичні файли для медіа - використовуємо /static щоб не конфліктувати з /media routes
+# Static files for media - using /static to avoid conflict with /media routes
 app.mount("/static", StaticFiles(directory="media"), name="media")
+
+# Log application startup
+app_logger.info("Recipe App API started successfully")

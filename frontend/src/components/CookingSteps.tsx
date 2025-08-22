@@ -7,18 +7,18 @@ interface CookingStepsProps {
 }
 
 const CookingSteps: React.FC<CookingStepsProps> = ({ steps }) => {
-  // Якщо steps це строка (старий формат), конвертуємо в новий формат
+  // If steps is a string (old format), convert to new format
   const normalizeSteps = (): CookingStep[] => {
     if (typeof steps === 'string') {
-      // Розділяємо текст на кроки по номерах або новим рядкам
+      // Split text into steps by numbers or new lines
       const stepTexts = steps
-        .split(/\n(?=\d+\.)/g) // Розділяємо по рядках що починаються з цифри і крапки
+        .split(/\n(?=\d+\.)/g) // Split by lines starting with digit and dot
         .filter(step => step.trim().length > 0);
 
       return stepTexts.map((stepText, index) => ({
         id: `step-${index + 1}`,
         stepNumber: index + 1,
-        description: stepText.replace(/^\d+\.\s*/, '').trim(), // Видаляємо номер кроку з початку
+        description: stepText.replace(/^\d+\.\s*/, '').trim(), // Remove step number from beginning
         media: []
       }));
     }
@@ -42,7 +42,7 @@ const CookingSteps: React.FC<CookingStepsProps> = ({ steps }) => {
         <div key={step.id || index} className="step-card mb-4">
           <div className="card">
             <div className="card-body">
-              {/* Заголовок кроку */}
+              {/* Step header */}
               <div className="d-flex align-items-center mb-3">
                 <div className="step-number-badge me-3">
                   <span className="badge bg-primary rounded-circle d-flex align-items-center justify-content-center" 
@@ -55,14 +55,14 @@ const CookingSteps: React.FC<CookingStepsProps> = ({ steps }) => {
                 </h5>
               </div>
 
-              {/* Опис кроку */}
+              {/* Step description */}
               <div className="step-description mb-3">
                 <p className="card-text" style={{ lineHeight: '1.6' }}>
                   {step.description}
                 </p>
               </div>
 
-              {/* Медіа файли */}
+              {/* Media files */}
               {step.media && step.media.length > 0 && (
                 <StepMedia 
                   media={step.media} 
@@ -74,12 +74,12 @@ const CookingSteps: React.FC<CookingStepsProps> = ({ steps }) => {
         </div>
       ))}
 
-      {/* Підсумок */}
+      {/* Summary */}
       <div className="cooking-summary mt-4 p-3 bg-light rounded">
         <div className="d-flex align-items-center">
           <i className="bi bi-check-circle-fill text-success me-2"></i>
           <span className="fw-bold">
-            Готово! Ви завершили всі {cookingSteps.length} кроків приготування.
+            Готово! Ви виконали всі {cookingSteps.length} кроків приготування.
           </span>
         </div>
         <small className="text-muted">

@@ -5,72 +5,72 @@ from pathlib import Path
 import shutil
 from typing import List
 
-# Базовий шлях для медіа файлів
+# Base path for media files
 MEDIA_ROOT = Path("media")
 RECIPE_STEPS_DIR = MEDIA_ROOT / "recipe_steps"
 
-# Створюємо директорії якщо не існують
+# Create directories if they don't exist
 MEDIA_ROOT.mkdir(exist_ok=True)
 RECIPE_STEPS_DIR.mkdir(exist_ok=True)
 
-# Дозволені типи файлів
+# Allowed file types
 ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 ALLOWED_VIDEO_EXTENSIONS = {".mp4", ".webm", ".ogg", ".mov"}
 ALLOWED_EXTENSIONS = ALLOWED_IMAGE_EXTENSIONS | ALLOWED_VIDEO_EXTENSIONS
 
-# Максимальний розмір файлу (10MB)
+# Maximum file size (10MB)
 MAX_FILE_SIZE = 10 * 1024 * 1024
 
 def get_file_type(filename: str) -> str:
-    """Визначає тип файлу за розширенням"""
+    """Determines file type by extension"""
     ext = Path(filename).suffix.lower()
     if ext in ALLOWED_IMAGE_EXTENSIONS:
         return "image"
     elif ext in ALLOWED_VIDEO_EXTENSIONS:
         return "video"
     else:
-        raise HTTPException(status_code=400, detail=f"Непідтримуваний тип файлу: {ext}")
+        raise HTTPException(status_code=400, detail=f"Unsupported file type: {ext}")
 
 def validate_file(file: UploadFile) -> None:
-    """Валідація завантаженого файлу"""
+    """Validates uploaded file"""
     if not file.filename:
-        raise HTTPException(status_code=400, detail="Файл повинен мати назву")
+        raise HTTPException(status_code=400, detail="File must have a name")
     
-    # Перевіряємо розширення
+    # Check extension
     ext = Path(file.filename).suffix.lower()
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=400, 
-            detail=f"Непідтримуваний тип файлу. Дозволені: {', '.join(ALLOWED_EXTENSIONS)}"
+            detail=f"Unsupported file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
         )
     
-    # Перевіряємо розмір файлу
+    # Check file size
     if hasattr(file.file, 'seek') and hasattr(file.file, 'tell'):
-        file.file.seek(0, 2)  # Переходимо в кінець файлу
+        file.file.seek(0, 2)  # Go to end of file
         size = file.file.tell()
-        file.file.seek(0)  # Повертаємося на початок
+        file.file.seek(0)  # Return to beginning
         
         if size > MAX_FILE_SIZE:
             raise HTTPException(
                 status_code=400, 
-                detail=f"Файл занадто великий. Максимальний розмір: {MAX_FILE_SIZE / 1024 / 1024:.1f}MB"
+                detail=f"File too large. Maximum size: {MAX_FILE_SIZE / 1024 / 1024:.1f}MB"
             )
 
 async def save_recipe_step_file(file: UploadFile) -> dict:
-    """Зберігає файл для кроку рецепта та повертає інформацію про нього"""
+    """Saves file for recipe step and returns information about it"""
     validate_file(file)
     
-    # Генеруємо унікальну назву файлу
+    # Generate unique filename
     file_extension = Path(file.filename).suffix.lower()
     unique_filename = f"{uuid.uuid4()}{file_extension}"
     file_path = RECIPE_STEPS_DIR / unique_filename
     
     try:
-        # Зберігаємо файл
+        # Save file
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        # Повертаємо інформацію про файл
+        # Return file information
         return {
             "filename": unique_filename,
             "original_filename": file.filename,
@@ -80,27 +80,27 @@ async def save_recipe_step_file(file: UploadFile) -> dict:
         }
     
     except Exception as e:
-        # Видаляємо файл якщо щось пішло не так
+        # Delete file if something went wrong
         if file_path.exists():
             file_path.unlink()
-        raise HTTPException(status_code=500, detail=f"Помилка збереження файлу: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"File save error: {str(e)}")
 
 async def save_multiple_step_files(files: List[UploadFile]) -> List[dict]:
-    """Зберігає декілька файлів для кроку рецепта"""
-    if len(files) > 5:  # Обмежуємо кількість файлів на крок
-        raise HTTPException(status_code=400, detail="Максимум 5 файлів на крок")
+    """Saves multiple files for recipe step"""
+    if len(files) > 5:  # Limit number of files per step
+        raise HTTPException(status_code=400, detail="Maximum 5 files per step")
     
     saved_files = []
     try:
         for file in files:
-            if file.filename:  # Ігноруємо порожні файли
+            if file.filename:  # Ignore empty files
                 file_info = await save_recipe_step_file(file)
                 saved_files.append(file_info)
         
         return saved_files
     
     except Exception as e:
-        # Видаляємо всі збережені файли у випадку помилки
+        # Delete all saved files in case of error
         for file_info in saved_files:
             file_path = RECIPE_STEPS_DIR / file_info["filename"]
             if file_path.exists():
@@ -108,7 +108,7 @@ async def save_multiple_step_files(files: List[UploadFile]) -> List[dict]:
         raise e
 
 def delete_recipe_step_file(filename: str) -> bool:
-    """Видаляє файл кроку рецепта"""
+    """Deletes recipe step file"""
     try:
         file_path = RECIPE_STEPS_DIR / filename
         if file_path.exists():
@@ -119,5 +119,5 @@ def delete_recipe_step_file(filename: str) -> bool:
         return False
 
 def get_file_url(filename: str) -> str:
-    """Повертає URL для доступу до файлу"""
+    """Returns URL for file access"""
     return f"/static/recipe_steps/{filename}"

@@ -48,7 +48,7 @@ const StepMedia: React.FC<StepMediaProps> = ({ media, stepNumber }) => {
           </video>
         )}
 
-        {/* Навігація між медіа файлами */}
+        {/* Navigation between media files */}
         {media.length > 1 && (
           <>
             <button
@@ -66,7 +66,7 @@ const StepMedia: React.FC<StepMediaProps> = ({ media, stepNumber }) => {
               <i className="bi bi-chevron-right"></i>
             </button>
 
-            {/* Індикатори */}
+            {/* Indicators */}
             <div className="position-absolute bottom-0 start-50 translate-middle-x mb-2">
               <div className="d-flex gap-1">
                 {media.map((_, index) => (
@@ -84,7 +84,7 @@ const StepMedia: React.FC<StepMediaProps> = ({ media, stepNumber }) => {
           </>
         )}
 
-        {/* Бейдж типу файлу */}
+        {/* File type badge */}
         <span className="position-absolute top-0 end-0 m-2">
           <span className={`badge ${currentMedia.type === 'image' ? 'bg-success' : 'bg-primary'}`}>
             {currentMedia.type === 'image' ? (
@@ -96,11 +96,11 @@ const StepMedia: React.FC<StepMediaProps> = ({ media, stepNumber }) => {
         </span>
       </div>
 
-      {/* Інформація про медіа */}
+      {/* Media information */}
       {media.length > 1 && (
         <div className="text-center mt-2">
           <small className="text-muted">
-            {currentMediaIndex + 1} з {media.length} медіа-файлів
+            {currentMediaIndex + 1} з {media.length} медіа файлів
           </small>
         </div>
       )}

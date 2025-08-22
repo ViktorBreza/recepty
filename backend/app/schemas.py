@@ -3,7 +3,7 @@ from typing import List, Optional, Union, Any
 from datetime import datetime
 
 # -------------------------------
-# Категорії та теги
+# Categories and tags
 # -------------------------------
 class TagBase(BaseModel):
     name: str
@@ -30,25 +30,25 @@ class Category(CategoryBase):
         from_attributes = True
 
 # -------------------------------
-# Структура інгредієнта
+# Ingredient structure
 # -------------------------------
 class Ingredient(BaseModel):
     name: str
     quantity: float
-    unit: str  # наприклад: "г", "кг", "ст.л.", "ч.л.", "мл"
+    unit: str  # for example: "g", "kg", "tbsp", "tsp", "ml"
 
 # -------------------------------
-# Медіа для кроків
+# Media for steps
 # -------------------------------
 class StepMedia(BaseModel):
     id: Optional[str] = None
-    type: str  # 'image' або 'video'
+    type: str  # 'image' or 'video'
     filename: str
     url: str
     alt: Optional[str] = None
 
 # -------------------------------
-# Крок приготування
+# Cooking step
 # -------------------------------
 class CookingStep(BaseModel):
     id: Optional[str] = None
@@ -57,13 +57,13 @@ class CookingStep(BaseModel):
     media: Optional[List[StepMedia]] = []
 
 # -------------------------------
-# Рецепти
+# Recipes
 # -------------------------------
 class RecipeBase(BaseModel):
     title: str
     description: Optional[str] = None
     ingredients: List[Ingredient]
-    steps: Union[str, List[CookingStep]]  # Підтримка старого та нового формату
+    steps: Union[str, List[CookingStep]]  # Support for old and new format
     servings: int
     category_id: int
     tags: Optional[List[int]] = []
@@ -72,7 +72,7 @@ class RecipeCreate(RecipeBase):
     pass
 
 # -------------------------------
-# Користувачі та аутентифікація
+# Users and authentication
 # -------------------------------
 class UserBase(BaseModel):
     email: EmailStr
@@ -111,15 +111,15 @@ class UserLogin(BaseModel):
     password: str
 
 # -------------------------------
-# Рейтинги та коментарі
+# Ratings and comments
 # -------------------------------
 class RatingBase(BaseModel):
-    rating: int  # від 1 до 5
+    rating: int  # from 1 to 5
 
 class RatingCreate(BaseModel):
     recipe_id: int
-    rating: int  # від 1 до 5
-    session_id: Optional[str] = None  # для анонімних користувачів
+    rating: int  # from 1 to 5
+    session_id: Optional[str] = None  # for anonymous users
 
 class Rating(RatingBase):
     id: int
@@ -139,7 +139,7 @@ class CommentBase(BaseModel):
 
 class CommentCreate(CommentBase):
     recipe_id: int
-    session_id: Optional[str] = None  # для анонімних користувачів
+    session_id: Optional[str] = None  # for anonymous users
 
 class Comment(CommentBase):
     id: int
@@ -159,7 +159,7 @@ class RecipeStats(BaseModel):
     total_comments: int = 0
 
 # -------------------------------
-# Оновлені схеми рецептів
+# Updated recipe schemas
 # -------------------------------
 class Recipe(RecipeBase):
     id: int

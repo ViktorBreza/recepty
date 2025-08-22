@@ -1,37 +1,37 @@
 #!/usr/bin/env python3
 """
-Скрипт для міграції старої бази даних до нової схеми з рейтингами та коментарями.
+Script for migrating old database to new schema with ratings and comments.
 """
 
 import sqlite3
 import os
 from pathlib import Path
 
-# Шляхи до баз даних
+# Database paths
 OLD_DB = "recipes_backup.db"
 NEW_DB = "recipes.db"
 
 def create_new_database():
-    """Створює нову базу даних з правильною схемою."""
-    print("Створюємо нову базу даних...")
+    """Creates new database with correct schema."""
+    print("Creating new database...")
     
-    # Видаляємо стару базу якщо існує
+    # Remove old database if exists
     if os.path.exists(NEW_DB):
         os.remove(NEW_DB)
     
-    # Імпортуємо моделі та створюємо таблиці
+    # Import models and create tables
     import sys
     sys.path.append('.')
     
-    # Імпортуємо всі моделі перед створенням таблиць
+    # Import all models before creating tables
     from app import models
     from app.database import Base, engine
     Base.metadata.create_all(bind=engine)
-    print("Нова база даних створена")
+    print("New database created")
 
 def migrate_data():
-    """Переносить дані зі старої бази в нову."""
-    print("Переносимо дані...")
+    """Transfers data from old database to new."""
+    print("Transferring data...")
     
     old_conn = sqlite3.connect(OLD_DB)
     new_conn = sqlite3.connect(NEW_DB)
@@ -40,8 +40,8 @@ def migrate_data():
         old_cursor = old_conn.cursor()
         new_cursor = new_conn.cursor()
         
-        # Мігруємо категорії
-        print("  - Мігруємо категорії...")
+        # Migrate categories
+        print("  - Migrating categories...")
         old_cursor.execute("SELECT id, name FROM categories")
         categories = old_cursor.fetchall()
         
@@ -50,10 +50,10 @@ def migrate_data():
                 "INSERT OR REPLACE INTO categories (id, name) VALUES (?, ?)",
                 (cat_id, name)
             )
-        print(f"    Мігровано {len(categories)} категорій")
+        print(f"    Migrated {len(categories)} categories")
         
-        # Мігруємо теги
-        print("  - Мігруємо теги...")
+        # Migrate tags
+        print("  - Migrating tags...")
         old_cursor.execute("SELECT id, name FROM tags")
         tags = old_cursor.fetchall()
         
@@ -62,18 +62,18 @@ def migrate_data():
                 "INSERT OR REPLACE INTO tags (id, name) VALUES (?, ?)",
                 (tag_id, name)
             )
-        print(f"    Мігровано {len(tags)} тегів")
+        print(f"    Migrated {len(tags)} tags")
         
-        # Створюємо базового користувача для рецептів
-        print("  - Створюємо базового користувача...")
+        # Create default user for recipes
+        print("  - Creating default user...")
         new_cursor.execute("""
             INSERT OR REPLACE INTO users 
             (id, email, username, hashed_password, is_admin, is_active, created_at, updated_at) 
             VALUES (1, 'system@example.com', 'system', 'hashed', 0, 1, datetime('now'), datetime('now'))
         """)
         
-        # Мігруємо рецепти
-        print("  - Мігруємо рецепти...")
+        # Migrate recipes
+        print("  - Migrating recipes...")
         old_cursor.execute("SELECT id, title, description, ingredients, steps, servings, category_id FROM recipes")
         recipes = old_cursor.fetchall()
         
@@ -83,10 +83,10 @@ def migrate_data():
                 (id, title, description, ingredients, steps, servings, category_id, author_id, created_at, updated_at) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, 1, datetime('now'), datetime('now'))
             """, (recipe_id, title, description, ingredients, steps, servings, category_id))
-        print(f"    Мігровано {len(recipes)} рецептів")
+        print(f"    Migrated {len(recipes)} recipes")
         
-        # Мігруємо зв'язки рецепт-тег
-        print("  - Мігруємо зв'язки рецепт-тег...")
+        # Migrate recipe-tag relationships
+        print("  - Migrating recipe-tag relationships...")
         try:
             old_cursor.execute("SELECT recipe_id, tag_id FROM recipe_tag")
             recipe_tags = old_cursor.fetchall()
@@ -96,15 +96,15 @@ def migrate_data():
                     "INSERT OR REPLACE INTO recipe_tag (recipe_id, tag_id) VALUES (?, ?)",
                     (recipe_id, tag_id)
                 )
-            print(f"    Мігровано {len(recipe_tags)} зв'язків")
+            print(f"    Migrated {len(recipe_tags)} relationships")
         except sqlite3.Error as e:
-            print(f"    Помилка при міграції зв'язків (ймовірно їх немає): {e}")
+            print(f"    Error migrating relationships (probably none exist): {e}")
         
-        # Підтверджуємо зміни
+        # Commit changes
         new_conn.commit()
-        print("Дані успішно мігровані")
+        print("Data successfully migrated")
         
-        # Перевіряємо результат
+        # Check result
         new_cursor.execute("SELECT COUNT(*) FROM recipes")
         recipes_count = new_cursor.fetchone()[0]
         
@@ -114,13 +114,13 @@ def migrate_data():
         new_cursor.execute("SELECT COUNT(*) FROM tags")
         tags_count = new_cursor.fetchone()[0]
         
-        print(f"\nРезультат міграції:")
-        print(f"  - Рецептів: {recipes_count}")
-        print(f"  - Категорій: {categories_count}")
-        print(f"  - Тегів: {tags_count}")
+        print(f"\nMigration result:")
+        print(f"  - Recipes: {recipes_count}")
+        print(f"  - Categories: {categories_count}")
+        print(f"  - Tags: {tags_count}")
         
     except Exception as e:
-        print(f"Помилка міграції: {e}")
+        print(f"Migration error: {e}")
         new_conn.rollback()
         raise
     finally:
@@ -129,20 +129,20 @@ def migrate_data():
 
 def main():
     if not os.path.exists(OLD_DB):
-        print(f"Стара база даних {OLD_DB} не знайдена!")
+        print(f"Old database {OLD_DB} not found!")
         return
     
-    print("Початок міграції бази даних...")
+    print("Starting database migration...")
     
-    # Створюємо нову базу
+    # Create new database
     create_new_database()
     
-    # Переносимо дані
+    # Transfer data
     migrate_data()
     
-    print("Міграція завершена успішно!")
-    print(f"Стара база збережена як {OLD_DB}")
-    print(f"Нова база створена як {NEW_DB}")
+    print("Migration completed successfully!")
+    print(f"Old database saved as {OLD_DB}")
+    print(f"New database created as {NEW_DB}")
 
 if __name__ == "__main__":
     main()

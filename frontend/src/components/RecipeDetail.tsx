@@ -40,7 +40,7 @@ const RecipeDetail: React.FC = () => {
         await axios.delete(`${API_ENDPOINTS.RECIPES}/${id}`, { headers });
         navigate('/recipes');
       } catch (err) {
-        console.error('Помилка при видаленні рецепта:', err);
+        console.error('Помилка при видаленні рецепту:', err);
         alert('Не вдалося видалити рецепт');
       }
     }
@@ -65,7 +65,7 @@ const RecipeDetail: React.FC = () => {
           <h2>{recipe.title}</h2>
           <p className="lead">{recipe.description}</p>
           
-          {/* Рейтинг рецепту */}
+          {/* Recipe rating */}
           <div className="mb-3">
             <StarRating recipeId={recipe.id} />
           </div>
@@ -86,7 +86,7 @@ const RecipeDetail: React.FC = () => {
       <div className="row">
         <div className="col-lg-4 mb-4">
           <div className="sticky-top" style={{ top: '20px' }}>
-            {/* Інгредієнти та калькулятор */}
+            {/* Ingredients and calculator */}
             <div className="mb-4">
               <h4>Оригінальні інгредієнти</h4>
               <ul className="list-group">
@@ -98,7 +98,7 @@ const RecipeDetail: React.FC = () => {
               </ul>
               <p className="mt-2">
                 <span className="badge bg-info">
-                  Оригінально на {recipe.servings} порцій
+                  Оригінально на {recipe.servings} порції
                 </span>
               </p>
             </div>
@@ -126,7 +126,7 @@ const RecipeDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Система коментарів */}
+      {/* Comment system */}
       <hr className="my-4" />
       <CommentSystem recipeId={recipe.id} />
     </div>

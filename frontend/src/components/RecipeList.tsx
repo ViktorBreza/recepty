@@ -41,7 +41,7 @@ const RecipeList: React.FC<RecipeListProps> = ({ onDelete }) => {
         setRecipes(recipes.filter(recipe => recipe.id !== id));
         if (onDelete) onDelete();
       } catch (err) {
-        console.error('Помилка при видаленні рецепта:', err);
+        console.error('Помилка при видаленні рецепту:', err);
         alert('Не вдалося видалити рецепт');
       }
     }
@@ -93,11 +93,11 @@ const RecipeList: React.FC<RecipeListProps> = ({ onDelete }) => {
               </p>
               <p className="card-text">
                 <small className="text-muted">
-                  Порцій: {recipe.servings}
+                  Порції: {recipe.servings}
                 </small>
               </p>
               
-              {/* Рейтинг рецепту */}
+              {/* Recipe rating */}
               <div className="mb-2">
                 <StarRating 
                   recipeId={recipe.id} 

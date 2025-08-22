@@ -6,7 +6,7 @@ from app.routers import recipes, categories, tags, auth, ratings, comments
 
 app = FastAPI(title="Recipe App API")
 
-# Створюємо таблиці після створення додатку
+# Create tables after app creation
 Base.metadata.create_all(bind=engine)
 
 # CORS Middleware
@@ -40,5 +40,5 @@ app.include_router(comments.router)
 # Simple media upload endpoint for testing
 @app.post("/media/upload-step-files")
 async def upload_step_files():
-    """Тестовий endpoint для завантаження файлів"""
+    """Test endpoint for file uploading"""
     return {"success": True, "message": "Upload endpoint is working!"}

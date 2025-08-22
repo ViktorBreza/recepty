@@ -18,7 +18,7 @@ const CommentSystem: React.FC<CommentSystemProps> = ({ recipeId }) => {
   const [editContent, setEditContent] = useState('');
   const { user, token } = useAuth();
 
-  // Завантажити коментарі
+  // Load comments
   useEffect(() => {
     const fetchComments = async () => {
       setLoading(true);
@@ -28,21 +28,21 @@ const CommentSystem: React.FC<CommentSystemProps> = ({ recipeId }) => {
       } catch (error: any) {
         console.error('Помилка завантаження коментарів:', error);
         if (error?.code === 'ECONNREFUSED' || error?.code === 'ERR_NETWORK') {
-          console.error('Backend сервер не запущений! Запустіть: python -m uvicorn app.main:app --reload --port 8001');
+          console.error('Backend server is not running! Start it with: python -m uvicorn app.main:app --reload --port 8001');
         }
-        // При помилці встановлюємо порожний масив
+        // Set empty array on error
         setComments([]);
       } finally {
         setLoading(false);
       }
     };
 
-    // Додаємо невелику затримку
+    // Add small delay
     const timeoutId = setTimeout(fetchComments, 100);
     return () => clearTimeout(timeoutId);
   }, [recipeId]);
 
-  // Встановити ім'я автора для зареєстрованих користувачів
+  // Set author name for registered users
   useEffect(() => {
     if (user) {
       setAuthorName(user.username);
@@ -74,7 +74,7 @@ const CommentSystem: React.FC<CommentSystemProps> = ({ recipeId }) => {
       setComments([response.data, ...comments]);
       setNewComment('');
       
-      // Очищаємо ім'я тільки для анонімних користувачів
+      // Clear name only for anonymous users
       if (!user) {
         setAuthorName('');
       }
@@ -111,12 +111,12 @@ const CommentSystem: React.FC<CommentSystemProps> = ({ recipeId }) => {
       setEditContent('');
     } catch (error) {
       console.error('Помилка редагування коментаря:', error);
-      alert('Не вдалося відредагувати коментар');
+      alert('Не вдалося редагувати коментар');
     }
   };
 
   const handleDeleteComment = async (commentId: number) => {
-    if (!window.confirm('Ви впевнені, що хочете видалити коментар?')) {
+    if (!window.confirm('Ви впевнені, що хочете видалити цей коментар?')) {
       return;
     }
 
@@ -146,7 +146,7 @@ const CommentSystem: React.FC<CommentSystemProps> = ({ recipeId }) => {
     if (user && comment.user_id === user.id) {
       return true;
     }
-    // Для анонімних користувачів можемо додати логіку session_id якщо потрібно
+    // For anonymous users we can add session_id logic if needed
     return false;
   };
 
@@ -162,7 +162,7 @@ const CommentSystem: React.FC<CommentSystemProps> = ({ recipeId }) => {
     <div className="mt-4">
       <h5>Коментарі ({comments.length})</h5>
       
-      {/* Форма додавання коментаря */}
+      {/* Comment form */}
       <div className="card mb-4">
         <div className="card-body">
           <form onSubmit={handleSubmitComment}>
@@ -189,7 +189,7 @@ const CommentSystem: React.FC<CommentSystemProps> = ({ recipeId }) => {
                 rows={3}
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Поділіться своєю думкою про рецепт..."
+                placeholder="Поділіться вашими думками про рецепт..."
                 required
               />
             </div>
@@ -205,9 +205,9 @@ const CommentSystem: React.FC<CommentSystemProps> = ({ recipeId }) => {
         </div>
       </div>
 
-      {/* Список коментарів */}
+      {/* Comments list */}
       {comments.length === 0 ? (
-        <p className="text-muted">Поки що немає коментарів. Будьте першим!</p>
+        <p className="text-muted">Коментарів ще немає. Будьте першим!</p>
       ) : (
         <div className="space-y-4">
           {comments.map((comment) => (

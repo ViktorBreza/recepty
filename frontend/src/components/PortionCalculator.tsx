@@ -16,22 +16,22 @@ const PortionCalculator: React.FC<PortionCalculatorProps> = ({
     const multiplier = desiredServings / originalServings;
     const result = originalQuantity * multiplier;
     
-    // Округлюємо до 2 знаків після коми для кращого відображення
+    // Round to 2 decimal places for better display
     return Math.round(result * 100) / 100;
   };
 
   const formatQuantity = (quantity: number): string => {
-    // Якщо число ціле, показуємо без десяткових
+    // If number is whole, show without decimals
     if (quantity % 1 === 0) {
       return quantity.toString();
     }
-    // Якщо має десяткові, показуємо максимум 2 знаки
+    // If has decimals, show maximum 2 digits
     return quantity.toFixed(2).replace(/\.?0+$/, '');
   };
 
   const handleServingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 1;
-    setDesiredServings(Math.max(0.5, value)); // Мінімум 0.5 порцій
+    setDesiredServings(Math.max(0.5, value)); // Minimum 0.5 servings
   };
 
   const presetServings = [1, 2, 4, 6, 8, 10];
@@ -45,7 +45,7 @@ const PortionCalculator: React.FC<PortionCalculatorProps> = ({
         </h5>
       </div>
       <div className="card-body">
-        {/* Контрол для вибору кількості порцій */}
+        {/* Control for selecting number of servings */}
         <div className="mb-3">
           <label htmlFor="servings-input" className="form-label">
             Кількість порцій:
@@ -71,7 +71,7 @@ const PortionCalculator: React.FC<PortionCalculatorProps> = ({
           </div>
         </div>
 
-        {/* Швидкий вибір популярних значень */}
+        {/* Quick selection of popular values */}
         <div className="mb-3">
           <small className="text-muted d-block mb-2">Швидкий вибір:</small>
           <div className="btn-group btn-group-sm" role="group">
@@ -90,7 +90,7 @@ const PortionCalculator: React.FC<PortionCalculatorProps> = ({
           </div>
         </div>
 
-        {/* Відображення перерахованих інгредієнтів */}
+        {/* Display of recalculated ingredients */}
         <div>
           <h6 className="mb-3">
             Інгредієнти на {formatQuantity(desiredServings)} 
@@ -125,12 +125,12 @@ const PortionCalculator: React.FC<PortionCalculatorProps> = ({
           </div>
         </div>
 
-        {/* Показник зміни */}
+        {/* Change indicator */}
         {desiredServings !== originalServings && (
           <div className="mt-3 p-2 bg-light rounded">
             <small className="text-muted">
               <i className="bi bi-info-circle me-1"></i>
-              Співвідношення: {formatQuantity(desiredServings / originalServings)}x від оригінального рецепта
+              Коефіцієнт: {formatQuantity(desiredServings / originalServings)}x від оригінального рецепту
             </small>
           </div>
         )}

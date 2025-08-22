@@ -8,12 +8,12 @@ get_db = database.get_db
 
 @router.get("/", response_model=List[schemas.Category])
 def read_categories(db: Session = Depends(get_db)):
-    """Отримує список всіх категорій (доступно всім)"""
+    """Gets list of all categories (available to all)"""
     return crud.get_categories(db)
 
 @router.get("/{category_id}", response_model=schemas.Category)
 def read_category(category_id: int, db: Session = Depends(get_db)):
-    """Отримує категорію за ID (доступно всім)"""
+    """Gets category by ID (available to all)"""
     db_category = crud.get_category_by_id(db, category_id)
     if not db_category:
         raise HTTPException(status_code=404, detail="Category not found")
@@ -25,7 +25,7 @@ def create_category(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin_user)
 ):
-    """Створює нову категорію (тільки для адмінів)"""
+    """Creates new category (admin only)"""
     return crud.create_category(db, category)
 
 @router.put("/{category_id}", response_model=schemas.Category)
@@ -35,7 +35,7 @@ def update_category(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin_user)
 ):
-    """Оновлює категорію (тільки для адмінів)"""
+    """Updates category (admin only)"""
     db_category = crud.update_category(db, category_id, category)
     if not db_category:
         raise HTTPException(status_code=404, detail="Category not found")
@@ -47,7 +47,7 @@ def delete_category(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin_user)
 ):
-    """Видаляє категорію (тільки для адмінів)"""
+    """Deletes category (admin only)"""
     success = crud.delete_category(db, category_id)
     if not success:
         raise HTTPException(status_code=404, detail="Category not found")

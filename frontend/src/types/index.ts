@@ -1,4 +1,4 @@
-// Користувач
+// User
 export interface User {
   id: number;
   email: string;
@@ -8,7 +8,7 @@ export interface User {
   created_at: string;
 }
 
-// Категорії та теги
+// Categories and tags
 export interface Tag {
   id: number;
   name: string;
@@ -19,14 +19,14 @@ export interface Category {
   name: string;
 }
 
-// Інгредієнт
+// Ingredient
 export interface Ingredient {
   name: string;
   quantity: number;
   unit: string;
 }
 
-// Медіа файл для кроку
+// Media file for step
 export interface StepMedia {
   id?: string;
   type: 'image' | 'video';
@@ -35,7 +35,7 @@ export interface StepMedia {
   alt?: string;
 }
 
-// Крок приготування
+// Cooking step
 export interface CookingStep {
   id?: string;
   stepNumber: number;
@@ -43,7 +43,7 @@ export interface CookingStep {
   media?: StepMedia[];
 }
 
-// Рейтинг
+// Rating
 export interface Rating {
   id: number;
   recipe_id: number;
@@ -55,7 +55,7 @@ export interface Rating {
   user?: User;
 }
 
-// Коментар
+// Comment
 export interface Comment {
   id: number;
   recipe_id: number;
@@ -68,20 +68,20 @@ export interface Comment {
   user?: User;
 }
 
-// Статистика рецепту
+// Recipe statistics
 export interface RecipeStats {
   average_rating?: number | null;
   total_ratings: number;
   total_comments: number;
 }
 
-// Рецепт
+// Recipe
 export interface Recipe {
   id: number;
   title: string;
   description: string | null;
   ingredients: Ingredient[];
-  steps: string | CookingStep[]; // Підтримуємо старий формат для зворотної сумісності
+  steps: string | CookingStep[]; // Support old format for backward compatibility
   servings: number;
   category: Category | null;
   tags: Tag[];
@@ -89,7 +89,7 @@ export interface Recipe {
   comments?: Comment[];
 }
 
-// Запити для створення
+// Creation requests
 export interface RatingCreate {
   recipe_id: number;
   rating: number;

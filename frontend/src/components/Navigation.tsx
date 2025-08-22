@@ -54,7 +54,7 @@ const Navigation: React.FC = () => {
                 aria-expanded="false"
               >
                 {user?.username}
-                {isAdmin && <span className="badge bg-warning text-dark ms-1">Admin</span>}
+                {isAdmin && <span className="badge bg-warning text-dark ms-1">Адмін</span>}
               </button>
               <ul className="dropdown-menu">
                 <li>

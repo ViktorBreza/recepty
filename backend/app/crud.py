@@ -4,7 +4,7 @@ from typing import List, Optional
 from app import models, schemas
 
 # -------------------------------
-# GET список рецептів з фільтрацією
+# GET list of recipes with filtering
 # -------------------------------
 def get_recipes(
     db: Session,
@@ -27,7 +27,7 @@ def get_recipes(
     return query.offset(skip).limit(limit).all()
 
 # -------------------------------
-# GET рецепт по id
+# GET recipe by id
 # -------------------------------
 def get_recipe_by_id(db: Session, recipe_id: int):
     return db.query(models.Recipe).options(
@@ -38,20 +38,20 @@ def get_recipe_by_id(db: Session, recipe_id: int):
     ).filter(models.Recipe.id == recipe_id).first()
 
 # -------------------------------
-# CREATE новий рецепт
+# CREATE new recipe
 # -------------------------------
 def create_recipe(db: Session, recipe: schemas.RecipeCreate):
-    # Обробляємо steps - може бути string або список CookingStep
+    # Process steps - can be string or list of CookingStep
     steps_data = recipe.steps
     if isinstance(recipe.steps, list):
-        # Конвертуємо CookingStep об'єкти в словники
+        # Convert CookingStep objects to dictionaries
         steps_data = [step.model_dump() if hasattr(step, 'model_dump') else step for step in recipe.steps]
     
     db_recipe = models.Recipe(
         title=recipe.title,
         description=recipe.description,
-        ingredients=[ing.model_dump() for ing in recipe.ingredients],  # конвертуємо у список dict
-        steps=steps_data,  # може бути string або список dict
+        ingredients=[ing.model_dump() for ing in recipe.ingredients],  # convert to list of dict
+        steps=steps_data,  # can be string or list of dict
         servings=recipe.servings,
         category_id=recipe.category_id
     )
@@ -68,17 +68,17 @@ def create_recipe(db: Session, recipe: schemas.RecipeCreate):
     return db_recipe
 
 # -------------------------------
-# UPDATE рецепт
+# UPDATE recipe
 # -------------------------------
 def update_recipe(db: Session, recipe_id: int, recipe: schemas.RecipeCreate):
     db_recipe = get_recipe_by_id(db, recipe_id)
     if not db_recipe:
         return None
 
-    # Обробляємо steps - може бути string або список CookingStep
+    # Process steps - can be string or list of CookingStep
     steps_data = recipe.steps
     if isinstance(recipe.steps, list):
-        # Конвертуємо CookingStep об'єкти в словники
+        # Convert CookingStep objects to dictionaries
         steps_data = [step.model_dump() if hasattr(step, 'model_dump') else step for step in recipe.steps]
 
     db_recipe.title = recipe.title
@@ -96,7 +96,7 @@ def update_recipe(db: Session, recipe_id: int, recipe: schemas.RecipeCreate):
     return db_recipe
 
 # -------------------------------
-# DELETE рецепт
+# DELETE recipe
 # -------------------------------
 def delete_recipe(db: Session, recipe_id: int):
     db_recipe = get_recipe_by_id(db, recipe_id)
@@ -107,23 +107,23 @@ def delete_recipe(db: Session, recipe_id: int):
     return True
 
 # ==========================
-# CRUD операції для категорій
+# CRUD operations for categories
 # ==========================
 
 def get_categories(db: Session):
     """
-    Отримати всі категорії.
+    Get all categories.
     """
     return db.query(models.Category).all()
 
 def get_category_by_id(db: Session, category_id: int):
     """
-    Отримати категорію за ID.
+    Get category by ID.
     """
     return db.query(models.Category).filter(models.Category.id == category_id).first()
 
 # -------------------------------
-# CREATE нова категорія
+# CREATE new category
 # -------------------------------
 def create_category(db: Session, category: schemas.CategoryCreate):
     db_category = models.Category(name=category.name)
@@ -133,7 +133,7 @@ def create_category(db: Session, category: schemas.CategoryCreate):
     return db_category
 
 # -------------------------------
-# UPDATE категорія
+# UPDATE category
 # -------------------------------
 def update_category(db: Session, category_id: int, category: schemas.CategoryCreate):
     db_category = get_category_by_id(db, category_id)
@@ -146,7 +146,7 @@ def update_category(db: Session, category_id: int, category: schemas.CategoryCre
     return db_category
 
 # -------------------------------
-# DELETE категорія
+# DELETE category
 # -------------------------------
 def delete_category(db: Session, category_id: int):
     db_category = get_category_by_id(db, category_id)
@@ -158,23 +158,23 @@ def delete_category(db: Session, category_id: int):
     return True
 
 # ==========================
-# CRUD операції для тегів
+# CRUD operations for tags
 # ==========================
 
 def get_tags(db: Session):
     """
-    Отримати всі теги.
+    Get all tags.
     """
     return db.query(models.Tag).all()
 
 def get_tag_by_id(db: Session, tag_id: int):
     """
-    Отримати тег за ID.
+    Get tag by ID.
     """
     return db.query(models.Tag).filter(models.Tag.id == tag_id).first()
 
 # -------------------------------
-# CREATE новий тег
+# CREATE new tag
 # -------------------------------
 def create_tag(db: Session, tag: schemas.TagCreate):
     db_tag = models.Tag(name=tag.name)
@@ -184,7 +184,7 @@ def create_tag(db: Session, tag: schemas.TagCreate):
     return db_tag
 
 # -------------------------------
-# UPDATE тег
+# UPDATE tag
 # -------------------------------
 def update_tag(db: Session, tag_id: int, tag: schemas.TagCreate):
     db_tag = get_tag_by_id(db, tag_id)
@@ -197,7 +197,7 @@ def update_tag(db: Session, tag_id: int, tag: schemas.TagCreate):
     return db_tag
 
 # -------------------------------
-# DELETE тег
+# DELETE tag
 # -------------------------------
 def delete_tag(db: Session, tag_id: int):
     db_tag = get_tag_by_id(db, tag_id)
@@ -209,15 +209,15 @@ def delete_tag(db: Session, tag_id: int):
     return True
 
 # ==========================
-# CRUD операції для рейтингів
+# CRUD operations for ratings
 # ==========================
 
 def create_or_update_rating(db: Session, rating_data: schemas.RatingCreate, user_id: Optional[int] = None):
     """
-    Створює або оновлює рейтинг рецепту.
-    Для зареєстрованих користувачів використовує user_id, для анонімних - session_id.
+    Creates or updates recipe rating.
+    Uses user_id for registered users, session_id for anonymous users.
     """
-    # Перевіряємо чи існує вже рейтинг від цього користувача/сесії
+    # Check if rating already exists from this user/session
     query = db.query(models.Rating).filter(models.Rating.recipe_id == rating_data.recipe_id)
     
     if user_id:
@@ -226,13 +226,13 @@ def create_or_update_rating(db: Session, rating_data: schemas.RatingCreate, user
         existing_rating = query.filter(models.Rating.session_id == rating_data.session_id).first()
     
     if existing_rating:
-        # Оновлюємо існуючий рейтинг
+        # Update existing rating
         existing_rating.rating = rating_data.rating
         db.commit()
         db.refresh(existing_rating)
         return existing_rating
     else:
-        # Створюємо новий рейтинг
+        # Create new rating
         new_rating = models.Rating(
             recipe_id=rating_data.recipe_id,
             user_id=user_id,
@@ -246,15 +246,15 @@ def create_or_update_rating(db: Session, rating_data: schemas.RatingCreate, user
 
 def get_recipe_stats(db: Session, recipe_id: int) -> schemas.RecipeStats:
     """
-    Отримує статистику рецепту: середній рейтинг, кількість оцінок та коментарів.
+    Gets recipe statistics: average rating, number of ratings and comments.
     """
-    # Середній рейтинг та кількість оцінок
+    # Average rating and rating count
     rating_stats = db.query(
         func.avg(models.Rating.rating).label('avg_rating'),
         func.count(models.Rating.id).label('total_ratings')
     ).filter(models.Rating.recipe_id == recipe_id).first()
     
-    # Кількість коментарів
+    # Comment count
     total_comments = db.query(func.count(models.Comment.id)).filter(
         models.Comment.recipe_id == recipe_id
     ).scalar()
@@ -267,7 +267,7 @@ def get_recipe_stats(db: Session, recipe_id: int) -> schemas.RecipeStats:
 
 def get_user_rating(db: Session, recipe_id: int, user_id: Optional[int] = None, session_id: Optional[str] = None):
     """
-    Отримує рейтинг користувача для рецепту.
+    Gets user's rating for recipe.
     """
     query = db.query(models.Rating).filter(models.Rating.recipe_id == recipe_id)
     
@@ -279,12 +279,12 @@ def get_user_rating(db: Session, recipe_id: int, user_id: Optional[int] = None, 
     return None
 
 # ==========================
-# CRUD операції для коментарів
+# CRUD operations for comments
 # ==========================
 
 def create_comment(db: Session, comment_data: schemas.CommentCreate, user_id: Optional[int] = None):
     """
-    Створює новий коментар до рецепту.
+    Creates new comment for recipe.
     """
     new_comment = models.Comment(
         recipe_id=comment_data.recipe_id,
@@ -300,7 +300,7 @@ def create_comment(db: Session, comment_data: schemas.CommentCreate, user_id: Op
 
 def get_recipe_comments(db: Session, recipe_id: int, skip: int = 0, limit: int = 50):
     """
-    Отримує коментарі до рецепту з пагінацією.
+    Gets recipe comments with pagination.
     """
     return db.query(models.Comment).filter(
         models.Comment.recipe_id == recipe_id
@@ -308,7 +308,7 @@ def get_recipe_comments(db: Session, recipe_id: int, skip: int = 0, limit: int =
 
 def update_comment(db: Session, comment_id: int, content: str, user_id: Optional[int] = None, session_id: Optional[str] = None):
     """
-    Оновлює коментар (тільки власник може редагувати).
+    Updates comment (only owner can edit).
     """
     query = db.query(models.Comment).filter(models.Comment.id == comment_id)
     
@@ -329,7 +329,7 @@ def update_comment(db: Session, comment_id: int, content: str, user_id: Optional
 
 def delete_comment(db: Session, comment_id: int, user_id: Optional[int] = None, session_id: Optional[str] = None):
     """
-    Видаляє коментар (тільки власник може видалити).
+    Deletes comment (only owner can delete).
     """
     query = db.query(models.Comment).filter(models.Comment.id == comment_id)
     

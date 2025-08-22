@@ -61,11 +61,10 @@ const TagForm: React.FC<TagFormProps> = ({ isEditMode = false }) => {
     setLoading(true);
 
     try {
-      let response;
       if (isEditMode) {
-        response = await axios.put(`${API_ENDPOINTS.TAGS}/${id}`, formData);
+        await axios.put(`${API_ENDPOINTS.TAGS}/${id}`, formData);
       } else {
-        response = await axios.post(`${API_ENDPOINTS.TAGS}/`, formData);
+        await axios.post(`${API_ENDPOINTS.TAGS}/`, formData);
       }
       navigate('/tags');
     } catch (err: any) {

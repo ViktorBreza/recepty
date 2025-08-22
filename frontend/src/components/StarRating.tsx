@@ -24,7 +24,7 @@ const StarRating: React.FC<StarRatingProps> = ({
   const [initialLoading, setInitialLoading] = useState(true);
   const { token } = useAuth();
 
-  // Розміри зірок
+  // Star sizes
   const starSizes = {
     sm: 'fs-6',
     md: 'fs-4', 
@@ -33,15 +33,15 @@ const StarRating: React.FC<StarRatingProps> = ({
 
   const starClass = starSizes[size];
 
-  // Завантажити поточний рейтинг користувача та статистику
+  // Load current user rating and statistics
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Завантажуємо статистику рецепту
+        // Load recipe statistics
         const statsResponse = await axios.get(`${API_ENDPOINTS.RATINGS}/${recipeId}/stats`);
         setStats(statsResponse.data);
 
-        // Завантажуємо рейтинг користувача
+        // Load user rating
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const userRatingResponse = await axios.get(
           `${API_ENDPOINTS.RATINGS}/${recipeId}/user-rating`,
@@ -49,11 +49,11 @@ const StarRating: React.FC<StarRatingProps> = ({
         );
         setUserRating(userRatingResponse.data.rating);
       } catch (error: any) {
-        console.error('Помилка завантаження рейтингу:', error);
+        console.error('Помилка завантаження оцінки:', error);
         if (error?.code === 'ECONNREFUSED' || error?.code === 'ERR_NETWORK') {
-          console.error('Backend сервер не запущений! Запустіть: python -m uvicorn app.main:app --reload --port 8001');
+          console.error('Backend server is not running! Start it with: python -m uvicorn app.main:app --reload --port 8001');
         }
-        // Встановлюємо порожні дані при помилці (наприклад, коли backend не запущений)
+        // Set empty data on error (e.g., when backend is not running)
         setStats({ average_rating: null, total_ratings: 0, total_comments: 0 });
         setUserRating(null);
       } finally {
@@ -61,7 +61,7 @@ const StarRating: React.FC<StarRatingProps> = ({
       }
     };
 
-    // Додаємо невелику затримку для уникнення швидкого мигання
+    // Add small delay to avoid quick flashing
     const timeoutId = setTimeout(fetchData, 100);
     return () => clearTimeout(timeoutId);
   }, [recipeId, token]);
@@ -84,11 +84,11 @@ const StarRating: React.FC<StarRatingProps> = ({
 
       setUserRating(rating);
       
-      // Оновлюємо статистику
+      // Update statistics
       const statsResponse = await axios.get(`${API_ENDPOINTS.RATINGS}/${recipeId}/stats`);
       setStats(statsResponse.data);
     } catch (error) {
-      console.error('Помилка збереження рейтингу:', error);
+      console.error('Помилка збереження оцінки:', error);
       alert('Не вдалося зберегти оцінку');
     } finally {
       setLoading(false);
@@ -124,11 +124,11 @@ const StarRating: React.FC<StarRatingProps> = ({
   };
 
   if (initialLoading) {
-    return <div className="text-muted">Завантаження рейтингу...</div>;
+    return <div className="text-muted">Завантаження оцінки...</div>;
   }
 
   if (!stats) {
-    return <div className="text-muted">Помилка завантаження рейтингу</div>;
+    return <div className="text-muted">Помилка завантаження оцінки</div>;
   }
 
   return (

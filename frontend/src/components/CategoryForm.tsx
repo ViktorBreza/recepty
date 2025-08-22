@@ -61,11 +61,10 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ isEditMode = false }) => {
     setLoading(true);
 
     try {
-      let response;
       if (isEditMode) {
-        response = await axios.put(`${API_ENDPOINTS.CATEGORIES}/${id}`, formData);
+        await axios.put(`${API_ENDPOINTS.CATEGORIES}/${id}`, formData);
       } else {
-        response = await axios.post(`${API_ENDPOINTS.CATEGORIES}/`, formData);
+        await axios.post(`${API_ENDPOINTS.CATEGORIES}/`, formData);
       }
       navigate('/categories');
     } catch (err: any) {

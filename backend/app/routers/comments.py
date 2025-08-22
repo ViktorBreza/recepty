@@ -9,7 +9,7 @@ get_db = database.get_db
 
 def get_session_id(request: Request) -> str:
     """
-    Генерує session_id для анонімних користувачів на основі IP та User-Agent.
+    Generates session_id for anonymous users based on IP and User-Agent.
     """
     import hashlib
     client_ip = request.client.host
@@ -25,18 +25,18 @@ def create_comment(
     current_user: Optional[schemas.User] = Depends(get_current_user_optional)
 ):
     """
-    Створити коментар до рецепту. Працює для зареєстрованих та анонімних користувачів.
+    Create comment for recipe. Works for registered and anonymous users.
     """
-    # Перевіряємо чи існує рецепт
+    # Check if recipe exists
     recipe = crud.get_recipe_by_id(db, comment_data.recipe_id)
     if not recipe:
-        raise HTTPException(status_code=404, detail="Рецепт не знайдено")
+        raise HTTPException(status_code=404, detail="Recipe not found")
     
-    # Для зареєстрованих користувачів беремо username як author_name
+    # For registered users use username as author_name
     if current_user:
         comment_data.author_name = current_user.username
     else:
-        # Для анонімних користувачів генеруємо session_id
+        # Generate session_id for anonymous users
         comment_data.session_id = get_session_id(request)
     
     user_id = current_user.id if current_user else None
@@ -50,7 +50,7 @@ def get_recipe_comments(
     db: Session = Depends(get_db)
 ):
     """
-    Отримати коментарі до рецепту з пагінацією.
+    Get recipe comments with pagination.
     """
     return crud.get_recipe_comments(db, recipe_id, skip, limit)
 
@@ -63,16 +63,16 @@ def update_comment(
     current_user: Optional[schemas.User] = Depends(get_current_user_optional)
 ):
     """
-    Оновити коментар (тільки власник може редагувати).
+    Update comment (only owner can edit).
     """
     user_id = current_user.id if current_user else None
     session_id = get_session_id(request) if not current_user else None
     
     updated_comment = crud.update_comment(db, comment_id, content, user_id, session_id)
     if not updated_comment:
-        raise HTTPException(status_code=404, detail="Коментар не знайдено або немає прав на редагування")
+        raise HTTPException(status_code=404, detail="Comment not found or no permission to edit")
     
-    return {"detail": "Коментар оновлено"}
+    return {"detail": "Comment updated"}
 
 @router.delete("/{comment_id}")
 def delete_comment(
@@ -82,13 +82,13 @@ def delete_comment(
     current_user: Optional[schemas.User] = Depends(get_current_user_optional)
 ):
     """
-    Видалити коментар (тільки власник може видалити).
+    Delete comment (only owner can delete).
     """
     user_id = current_user.id if current_user else None
     session_id = get_session_id(request) if not current_user else None
     
     success = crud.delete_comment(db, comment_id, user_id, session_id)
     if not success:
-        raise HTTPException(status_code=404, detail="Коментар не знайдено або немає прав на видалення")
+        raise HTTPException(status_code=404, detail="Comment not found or no permission to delete")
     
-    return {"detail": "Коментар видалено"}
+    return {"detail": "Comment deleted"}
