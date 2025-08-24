@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE_URL = 'http://127.0.0.1:8001';
+export const API_BASE_URL = `http://${window.location.hostname}:8001`;
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
   
   // Recipes  
   RECIPES: `${API_BASE_URL}/recipes`,
+  RECIPE_DELETE: (id: number) => `${API_BASE_URL}/recipes/${id}`,
   
   // Categories
   CATEGORIES: `${API_BASE_URL}/categories`,

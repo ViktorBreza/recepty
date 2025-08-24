@@ -12,7 +12,7 @@ import { API_ENDPOINTS } from '../config/api';
 const RecipeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated, token, isAdmin } = useAuth();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +46,16 @@ const RecipeDetail: React.FC = () => {
     }
   };
 
+  const handleEditClick = () => {
+    if (isAuthenticated) {
+      navigate(`/edit-recipe/${recipe?.id}`);
+    } else {
+      if (window.confirm('Редагувати рецепти можуть тільки зареєстровані користувачі. Хочете увійти або зареєструватися?')) {
+        navigate('/login');
+      }
+    }
+  };
+
   if (loading) {
     return <div>Завантаження...</div>;
   }
@@ -70,16 +80,16 @@ const RecipeDetail: React.FC = () => {
             <StarRating recipeId={recipe.id} />
           </div>
         </div>
-        {isAuthenticated && (
-          <div className="btn-group">
-            <Link to={`/edit-recipe/${recipe.id}`} className="btn btn-outline-primary">
-              Редагувати
-            </Link>
+        <div className="btn-group">
+          <button onClick={handleEditClick} className="btn btn-outline-primary">
+            Редагувати
+          </button>
+          {isAuthenticated && isAdmin && (
             <button onClick={handleDelete} className="btn btn-outline-danger">
               Видалити
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <hr />
 
