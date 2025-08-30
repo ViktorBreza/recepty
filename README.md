@@ -94,7 +94,7 @@ npm start
 ### ⚠️ ВАЖЛИВО: Обидва сервери повинні бути запущені!
 
 Після запуску:
-- Backend API: http://127.0.0.1:8001
+- Backend API: http://127.0.0.1:8000
 - Frontend: http://localhost:3000
 - API документація: http://127.0.0.1:8001/docs
 
