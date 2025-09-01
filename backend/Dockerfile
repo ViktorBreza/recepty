@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY requirements.txt .
+COPY backend/requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --user -r requirements.txt
@@ -39,7 +39,7 @@ COPY --from=builder /root/.local /home/kitkuhar/.local
 
 # Copy application code
 COPY backend/ ./
-COPY requirements.txt .
+COPY backend/requirements.txt .
 
 # Create necessary directories
 RUN mkdir -p media logs && \
@@ -56,7 +56,7 @@ EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:8000/docs || exit 1
+    CMD curl -f http://localhost:8000/health || exit 1
 
 # Start command optimized for Pi 5
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

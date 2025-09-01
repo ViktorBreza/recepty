@@ -33,29 +33,33 @@ def setup_logger(name: str = __name__, level: str = "INFO") -> logging.Logger:
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
     
-    # File handler with rotation (daily)
-    file_handler = TimedRotatingFileHandler(
-        LOG_DIR / "app.log",
-        when="midnight",
-        interval=1,
-        backupCount=7,  # Keep logs for 7 days
-        encoding="utf-8"
-    )
-    file_handler.setLevel(log_level)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-    
-    # Separate file for errors
-    error_handler = TimedRotatingFileHandler(
-        LOG_DIR / "error.log",
-        when="midnight",
-        interval=1,
-        backupCount=30,  # Keep errors longer
-        encoding="utf-8"
-    )
-    error_handler.setLevel(logging.ERROR)
-    error_handler.setFormatter(formatter)
-    logger.addHandler(error_handler)
+    # File handler with rotation (daily) - only if we can write to logs
+    try:
+        file_handler = TimedRotatingFileHandler(
+            LOG_DIR / "app.log",
+            when="midnight",
+            interval=1,
+            backupCount=7,  # Keep logs for 7 days
+            encoding="utf-8"
+        )
+        file_handler.setLevel(log_level)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+        
+        # Separate file for errors
+        error_handler = TimedRotatingFileHandler(
+            LOG_DIR / "error.log",
+            when="midnight",
+            interval=1,
+            backupCount=30,  # Keep errors longer
+            encoding="utf-8"
+        )
+        error_handler.setLevel(logging.ERROR)
+        error_handler.setFormatter(formatter)
+        logger.addHandler(error_handler)
+    except PermissionError:
+        # If we can't write to logs directory, just use console logging
+        logger.warning("Cannot write to logs directory, using console logging only")
     
     return logger
 

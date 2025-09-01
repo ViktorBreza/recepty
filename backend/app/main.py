@@ -55,6 +55,11 @@ app.add_middleware(
 def root():
     return RedirectResponse(url="/docs")
 
+# Health check endpoint
+@app.get("/health", include_in_schema=False)
+def health():
+    return {"status": "Кіт Кухар is healthy!"}
+
 # Routers (IMPORTANT: routers must be BEFORE StaticFiles!)
 app.include_router(auth.router)
 app.include_router(recipes.router)

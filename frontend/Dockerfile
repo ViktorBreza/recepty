@@ -5,17 +5,17 @@ FROM node:18-alpine as builder
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY frontend/package*.json ./
 
-# Install dependencies with npm ci for faster, reliable builds
-RUN npm ci --only=production
+# Install dependencies
+RUN npm install --only=production
 
 # Copy source code
-COPY . .
+COPY frontend/ .
 
 # Set environment for production build
 ENV NODE_ENV=production
-ENV REACT_APP_API_URL=http://localhost:8000
+ENV REACT_APP_API_URL=/api
 
 # Build the React app
 RUN npm run build
@@ -27,23 +27,15 @@ FROM nginx:alpine
 RUN apk add --no-cache curl
 
 # Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built app from builder stage
 COPY --from=builder /app/build /usr/share/nginx/html
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S kitkuhar && \
-    adduser -S kitkuhar -u 1001
-
-# Set proper permissions
-RUN chown -R kitkuhar:kitkuhar /usr/share/nginx/html && \
-    chown -R kitkuhar:kitkuhar /var/cache/nginx && \
-    chown -R kitkuhar:kitkuhar /var/log/nginx && \
-    chown -R kitkuhar:kitkuhar /etc/nginx/conf.d
-
-# Switch to non-root user
-USER kitkuhar
+# Set proper permissions for nginx files
+RUN mkdir -p /var/cache/nginx/client_temp && \
+    chmod -R 755 /var/cache/nginx && \
+    chmod -R 755 /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80

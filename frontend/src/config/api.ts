@@ -1,5 +1,5 @@
-// API Configuration
-export const API_BASE_URL = process.env.REACT_APP_API_URL || `http://${window.location.hostname}:8000`;
+// API Configuration - Use relative URLs for production
+export const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 // API Endpoints
 export const API_ENDPOINTS = {
