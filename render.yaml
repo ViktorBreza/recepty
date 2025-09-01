@@ -13,16 +13,18 @@ services:
           name: kitkuhar-db
           property: connectionString
     
-  # Frontend Static Site
-  - type: static
+  # Frontend Web Service (serving static files)
+  - type: web
     name: kitkuhar-frontend
+    env: node
     buildCommand: cd frontend && npm ci && npm run build
-    staticPublishPath: frontend/build
+    startCommand: cd frontend && npx serve -s build -l $PORT
     envVars:
+      - key: NODE_VERSION
+        value: 18
       - key: REACT_APP_API_URL
         value: https://kitkuhar-backend.onrender.com
 
-  # PostgreSQL Database
 databases:
   - name: kitkuhar-db
     databaseName: kitkuhar
