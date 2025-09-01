@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: kitkuhar-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kitkuhar
+      POSTGRES_USER: kitkuhar_user
+      POSTGRES_PASSWORD: kitkuhar_password_2024
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - kitkuhar-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kitkuhar_user -d kitkuhar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend (FastAPI)
+  backend:
+    build: 
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: kitkuhar-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://kitkuhar_user:kitkuhar_password_2024@database:5432/kitkuhar
+      SECRET_KEY: kitkuhar_secret_key_2024_very_secure
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    volumes:
+      - media_files:/app/media
+      - ./logs:/app/logs
+    ports:
+      - "8001:8000"
+    networks:
+      - kitkuhar-network
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend (React + Nginx)
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: kitkuhar-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - kitkuhar-network
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Reverse Proxy (Nginx)
+  nginx:
+    image: nginx:alpine
+    container_name: kitkuhar-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - media_files:/var/www/media
+    networks:
+      - kitkuhar-network
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  postgres_data:
+    driver: local
+  media_files:
+    driver: local
+
+networks:
+  kitkuhar-network:
+    driver: bridge
