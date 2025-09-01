@@ -33,6 +33,8 @@ async def log_requests(request: Request, call_next):
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://kitkuhar-frontend.onrender.com",
+    "https://*.onrender.com",
 ]
 
 app.add_middleware(

@@ -5,9 +5,52 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #FDEFDA !important;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(250,235,215,0.8) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255,248,220,0.6) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(245,245,220,0.4) 0%, transparent 50%) !important;
+  min-height: 100vh !important;
+}
+
+#root {
+  background-color: transparent !important;
+  min-height: 100vh;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+@keyframes gentle-float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-10px) rotate(1deg); 
+  }
+}
+
+.mascot-hover-effect {
+  transition: all 0.3s ease;
+}
+
+.mascot-hover-effect:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 15px 30px rgba(0,0,0,0.2));
+}
+
+.card, .bg-light {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.nav-link, .navbar-brand {
+  color: #5a4a3a !important;
+}
+
+.nav-link:hover {
+  color: #3a2a1a !important;
 }

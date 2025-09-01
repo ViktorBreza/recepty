@@ -116,9 +116,12 @@ function App() {
           </main>
 
           <footer className="pt-4 my-md-5 pt-md-5 border-top">
-            <div className="row">
-              <div className="col-12 col-md">
+            <div className="row align-items-center">
+              <div className="col-12 col-md-6">
                 <small className="d-block mb-3 text-muted">© 2025</small>
+              </div>
+              <div className="col-12 col-md-6 text-end">
+                <img src="/logo.svg" alt="Логотип" width="30" height="30" className="opacity-50" />
               </div>
             </div>
           </footer>

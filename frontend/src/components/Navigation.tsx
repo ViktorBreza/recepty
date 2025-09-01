@@ -15,7 +15,8 @@ const Navigation: React.FC = () => {
     <header>
       <div className="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
         <Link to="/" className="d-flex align-items-center text-dark text-decoration-none">
-          <span className="fs-4">🍳 Книга Рецептів</span>
+          <img src="/logo.svg" alt="Логотип" width="40" height="40" className="me-2" />
+          <span className="fs-4">Кіт Кухар</span>
         </Link>
 
         <nav className="d-inline-flex mt-2 mt-md-0 ms-md-auto align-items-center">

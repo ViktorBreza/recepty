@@ -1,6 +1,6 @@
 {
-  "short_name": "Recepty",
-  "name": "Recepty - Recipe Manager",
+  "short_name": "Кіт Кухар",
+  "name": "Кіт Кухар - Рецепти від котика-кухаря",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,6 +10,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#FDEFDA",
+  "background_color": "#FDEFDA"
 }

@@ -4,7 +4,13 @@
       "Bash(taskkill:*)",
       "Bash(wmic process where processid=14488 get name,commandline:*)",
       "Bash(wmic process:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(copy:*)",
+      "Bash(npm i:*)",
+      "Bash(claude doctor)",
+      "Bash(claude --version)",
+      "Bash(del \"C:\\Users\\baktorz\\Desktop\\recepty\\frontend\\public\\mascot.svg\")",
+      "Bash(npm start)"
     ],
     "deny": [],
     "ask": []
