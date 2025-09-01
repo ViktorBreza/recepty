@@ -166,18 +166,6 @@ ENVIRONMENT=production
 
 ## 🗄️ Database Management
 
-### pgAdmin Access
-- **URL**: https://kitkuhar.com/db-admin/
-- **Email**: brezaviktor@gmail.com  
-- **Password**: kitkuharadminzalupa
-
-### Database Connection (в pgAdmin)
-- **Host**: database
-- **Port**: 5432
-- **Database**: kitkuhar
-- **Username**: kitkuhar_user
-- **Password**: kitkuhar_password_2024
-
 ### Backup System
 ```bash
 # Ручний бекап
@@ -372,7 +360,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 - 📧 **Issues**: Create GitHub issue for bug reports
 - 🌐 **Live Demo**: https://kitkuhar.com
-- 🗄️ **Database Admin**: https://kitkuhar.com/db-admin/
 
 ---
 
