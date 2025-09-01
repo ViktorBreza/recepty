@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CookingStep, StepMedia } from '../types';
 import axios from 'axios';
-import { API_ENDPOINTS } from '../config/api';
+import { API_ENDPOINTS, API_BASE_URL } from '../config/api';
 
 interface StepFormProps {
   step: CookingStep;
@@ -46,7 +46,7 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
           id: `media-${Date.now()}-${Math.random()}`,
           type: fileInfo.type as 'image' | 'video',
           filename: fileInfo.filename,
-          url: `http://127.0.0.1:8001${fileInfo.url}`,
+          url: `${API_BASE_URL}${fileInfo.url}`,
           alt: `Step ${step.stepNumber} - ${fileInfo.original_filename}`
         }));
 

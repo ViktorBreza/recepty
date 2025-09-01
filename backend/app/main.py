@@ -6,6 +6,7 @@ from app.database import Base, engine
 from app.routers import recipes, categories, tags, media, auth, ratings, comments
 from app.logger import app_logger, log_request
 import time
+import os
 
 app = FastAPI(title="Recipe App API")
 
@@ -29,13 +30,16 @@ async def log_requests(request: Request, call_next):
     
     return response
 
-# CORS Middleware
+# CORS Middleware - Universal configuration
+# Get allowed origins from environment variable or use defaults
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLOWED_ORIGINS") else []
+
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://kitkuhar-frontend.onrender.com",
-    "https://*.onrender.com",
-]
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+] + ALLOWED_ORIGINS
 
 app.add_middleware(
     CORSMiddleware,

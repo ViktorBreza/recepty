@@ -86,7 +86,7 @@ ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 # API URL for frontend
-REACT_APP_API_URL=http://localhost:8001
+REACT_APP_API_URL=http://localhost:8000
 EOF
     print_success "Environment file created"
 else

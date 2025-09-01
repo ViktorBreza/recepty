@@ -10,7 +10,7 @@ class ApiClient {
   private baseURL: string;
   private defaultHeaders: HeadersInit;
 
-  constructor(baseURL: string = process.env.REACT_APP_API_URL || 'http://localhost:8000') {
+  constructor(baseURL: string = process.env.REACT_APP_API_URL || `http://${window.location.hostname}:8000`) {
     this.baseURL = baseURL;
     this.defaultHeaders = {
       'Content-Type': 'application/json',

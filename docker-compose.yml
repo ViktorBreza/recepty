@@ -39,7 +39,7 @@ services:
       - media_files:/app/media
       - ./logs:/app/logs
     ports:
-      - "8001:8000"
+      - "8000:8000"
     networks:
       - kitkuhar-network
     depends_on:

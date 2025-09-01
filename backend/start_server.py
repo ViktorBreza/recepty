@@ -73,7 +73,7 @@ def kill_processes_on_port(port):
 
 def start_uvicorn():
     """Starts uvicorn server"""
-    PORT = 8001
+    PORT = 8000
     
     print("=" * 50)
     print("  SAFE BACKEND SERVER STARTUP")
