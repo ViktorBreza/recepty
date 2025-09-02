@@ -150,7 +150,7 @@ sudo docker compose ps
 Створіть `.env` файл з необхідними змінними:
 ```env
 # Database
-DATABASE_URL=postgresql://kitkuhar_user:kitkuhar_password_2024@database:5432/kitkuhar
+DATABASE_URL=postgresql:/
 
 # Backend Security  
 SECRET_KEY=your-secret-key-here
@@ -174,13 +174,6 @@ ENVIRONMENT=production
 # Автоматичний бекап (налаштовано збереження останніх 7 бекапів)
 # Файли зберігаються в: database/backups/
 ```
-
-### Data Location
-База даних зберігається в Docker volume:
-```
-/var/lib/docker/volumes/kitkuhar_postgres_data/_data/pgdata/
-```
-
 ## 📁 Структура проекту
 
 ```
