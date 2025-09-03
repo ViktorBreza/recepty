@@ -42,7 +42,8 @@
       "WebFetch(domain:www.whatsmydns.net)",
       "Bash(ping:*)",
       "Bash(sudo:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

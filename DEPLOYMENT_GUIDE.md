@@ -1,206 +1,148 @@
-# 🐱👨‍🍳 Кіт Кухар - Universal Deployment Guide
+# 🚀 Інструкція по налаштуванню автодеплою
 
-Цей гайд показує як задеплоїти **Кіт Кухар** на будь-якій платформі.
+## Крок 1: На комп'ютері (зараз)
 
-## 🌍 Універсальність
-
-Проект налаштований для роботи на:
-- ☁️ **Cloud платформи:** Render, Vercel, Netlify, Railway, Heroku
-- 🏠 **Власний сервер:** VPS, домашній комп'ютер, Raspberry Pi
-- 🐳 **Docker:** будь-де де працює Docker
-- 🔄 **Локально:** для розробки та тестування
-
-## ⚙️ Конфігурація через змінні оточення
-
-### Frontend налаштування:
 ```bash
-REACT_APP_API_URL=https://your-backend-domain.com
+# Відправ всі зміни
+git add .
+git commit -m "Setup dev/test environments"
+git push origin main
+
+# Створи test гілку
+git checkout -b test
+git push -u origin test
+git checkout main
 ```
 
-### Backend налаштування:
-```bash
-# База даних (SQLite/PostgreSQL/MySQL)
-DATABASE_URL=sqlite:///./recipes.db
+## Крок 2: GitHub Secrets
 
-# Безпека
-SECRET_KEY=your-unique-secret-key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+Йди в GitHub → Settings → Secrets and Variables → Actions і додай:
 
-# CORS (дозволені домени)
-ALLOWED_ORIGINS=https://your-frontend.com,https://www.your-frontend.com
-
-# Сервер
-HOST=0.0.0.0
-PORT=8000
+```
+PI_HOST = kitkuhar.com (або IP твоєї Pi)
+PI_USER = pi (або твій користувач на Pi) 
+PI_SSH_KEY = [SSH приватний ключ - дивись нижче як створити]
 ```
 
-## 🚀 Деплоймент опції
+### Створення SSH ключа:
 
-### 1. 🌐 Render (безкоштовно)
-
-**Backend Web Service:**
+На комп'ютері:
 ```bash
-Build: pip install -r requirements.txt
-Start: uvicorn main:app --host 0.0.0.0 --port $PORT
+ssh-keygen -t ed25519 -C "github-actions"
+# Натисни Enter для збереження в ~/.ssh/id_ed25519
+# Не ставити пароль для автоматизації
+
+# Скопіюй публічний ключ
+cat ~/.ssh/id_ed25519.pub
 ```
 
-**Frontend Web Service:**
+На Raspberry Pi:
 ```bash
-Build: cd frontend && npm ci && npm run build
-Start: cd frontend && npx serve -s build -l $PORT
-
-Environment: 
-REACT_APP_API_URL=https://your-backend.onrender.com
+# Додай публічний ключ в authorized_keys
+echo "ssh-ed25519 AAAA... github-actions" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
 ```
 
-### 2. 🔷 Vercel (безкоштовно)
+Приватний ключ (`~/.ssh/id_ed25519`) - скопіюй весь вміст в GitHub Secret `PI_SSH_KEY`
 
-**Frontend:**
-- Підключити GitHub репозиторій
-- Build Command: `cd frontend && npm run build`
-- Output Directory: `frontend/build`
-- Environment: `REACT_APP_API_URL=https://your-backend.com`
+## Крок 3: На Raspberry Pi
 
-### 3. 🟢 Netlify (безкоштовно)
-
-**Frontend:**
-- Підключити GitHub
-- Build Command: `cd frontend && npm run build`
-- Publish Directory: `frontend/build`
-
-### 4. 🐳 Docker (універсально)
+**ВАЖЛИВО: Не зупиняй поточний сайт!**
 
 ```bash
-# Клонувати та запустити
-git clone <repo> kitkuhar
-cd kitkuhar
+# Створи окремі директорії для середовищ
+sudo mkdir -p /home/pi/kitkuhar-deployments/{test,prod}
+sudo chown -R pi:pi /home/pi/kitkuhar-deployments
+
+# Клонуй репо для test середовища
+cd /home/pi/kitkuhar-deployments/test
+git clone https://github.com/[твій-username]/kitkuhar.git .
+git checkout test
+
+# Клонуй репо для prod середовища  
+cd /home/pi/kitkuhar-deployments/prod
+git clone https://github.com/[твій-username]/kitkuhar.git .
+git checkout main
+
+# Копіюй .env файли
+cd /home/pi/kitkuhar-deployments/test
+cp .env.test .env
+
+cd /home/pi/kitkuhar-deployments/prod  
+cp .env.production .env
+```
+
+## Крок 4: Тестування без зупинки prod
+
+```bash
+# Спочатку тестуємо test середовище на інших портах
+cd /home/pi/kitkuhar-deployments/test
+docker-compose -f docker-compose.test.yml up -d
+
+# Перевір чи працює на тестових портах
+curl http://localhost:3002  # frontend test
+curl http://localhost:8002  # backend test
+```
+
+## Крок 5: Коли готовий до переходу
+
+Коли все протестовано і працює:
+
+```bash
+# Зупини старий сайт
+cd /home/pi/[твоя-поточна-директорія]  
+docker-compose down
+
+# Запусти новий prod через автодеплой
+cd /home/pi/kitkuhar-deployments/prod
 docker-compose up -d
 
-# Доступ: http://localhost
+# Перевір
+curl https://kitkuhar.com
 ```
 
-### 5. 🏠 Власний сервер
+## Крок 6: Workflow розробки
 
+Тепер для внесення змін:
+
+1. **На комп'ютері розробляємо:**
 ```bash
-# Backend
-cd backend
-pip install -r ../requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port 8001
-
-# Frontend  
-cd frontend
-npm install
-npm run build
-npx serve -s build -l 3000
+git checkout test
+# Робимо зміни
+git add .
+git commit -m "feat: нова функція"
+git push origin test  # ← Автодеплой на test!
 ```
 
-### 6. 🫐 Raspberry Pi
+2. **Тестуємо на https://test.kitkuhar.com**
 
+3. **Якщо все OK - переносимо в prod:**
 ```bash
-# Автоматичне встановлення
-git clone <repo> kitkuhar
-cd kitkuhar
-chmod +x deploy-pi.sh
-./deploy-pi.sh
+git checkout main
+git merge test
+git push origin main  # ← Автодеплой на prod!
 ```
 
-## 🔐 Безпека для продакшену
+## Переваги цього підходу:
 
-### 1. Змінити паролі:
+✅ Сайт не зупиняється  
+✅ Автоматичні деплої  
+✅ Тестування перед продом  
+✅ Rollback через GitHub  
+✅ Розробка на комп'ютері  
+
+## Troubleshooting
+
+### Якщо щось пішло не так:
 ```bash
-cp .env.example .env
-nano .env  # Встановити унікальні значення
+# Швидкий rollback до попередньої версії
+cd /home/pi/kitkuhar-deployments/prod
+git reset --hard HEAD~1
+docker-compose up --build -d
 ```
 
-### 2. Налаштувати CORS:
+### Перегляд логів:
 ```bash
-ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+cd /home/pi/kitkuhar-deployments/prod
+docker-compose logs -f
 ```
-
-### 3. Використовувати HTTPS:
-- Налаштувати SSL сертифікати
-- Використовувати reverse proxy (Nginx)
-
-## 📊 Вимоги до ресурсів
-
-### Мінімальні:
-- **RAM:** 512MB (1GB рекомендовано)
-- **CPU:** 1 core  
-- **Диск:** 2GB
-- **Мережа:** Стабільне з'єднання
-
-### Рекомендовані:
-- **RAM:** 2GB+
-- **CPU:** 2+ cores
-- **Диск:** 5GB+ (SSD)
-- **Мережа:** 10+ Mbps
-
-## 🔧 Налаштування для різних платформ
-
-### Cloud платформи:
-```bash
-# .env для продакшену
-DATABASE_URL=postgresql://user:pass@host:5432/db
-REACT_APP_API_URL=https://api.yourdomain.com
-ALLOWED_ORIGINS=https://yourdomain.com
-ENVIRONMENT=production
-```
-
-### Локальна розробка:
-```bash
-# .env для розробки  
-DATABASE_URL=sqlite:///./recipes.db
-REACT_APP_API_URL=http://localhost:8000
-ALLOWED_ORIGINS=http://localhost:3000
-ENVIRONMENT=development
-```
-
-### Docker:
-```bash
-# Змінні в docker-compose.yml
-DATABASE_URL=postgresql://user:pass@database:5432/kitkuhar
-REACT_APP_API_URL=http://backend:8000
-```
-
-## 🎯 Перевірка деплойменту
-
-### 1. Backend:
-- Перейти на `/docs` - має показати API документацію
-- Перевірити `/health` - має повернути "healthy"
-
-### 2. Frontend:
-- Відкрити головну сторінку
-- Перевірити чи завантажується маскот
-- Спробувати зареєструватись/увійти
-
-### 3. Integration:
-- Створити рецепт
-- Додати фото
-- Залишити коментар/оцінку
-
-## 🆘 Усунення проблем
-
-### CORS помилки:
-```bash
-# Додати домен до ALLOWED_ORIGINS
-ALLOWED_ORIGINS=https://yourdomain.com,https://your-frontend.com
-```
-
-### База даних:
-```bash
-# Перевірити підключення
-python -c "from backend.app.database import engine; print('DB OK' if engine else 'DB Error')"
-```
-
-### API недоступне:
-```bash
-# Перевірити URL
-curl https://your-backend.com/health
-```
-
-## 🎉 Готово!
-
-Ваш **Кіт Кухар** тепер працює універсально на будь-якій платформі! 🌍
-
-Для специфічної платформи дивіться відповідні секції цього гайду.

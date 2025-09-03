@@ -1,0 +1,114 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  security-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Security Audit
+      run: |
+        cd frontend
+        npm audit --audit-level=high
+        
+    - name: Check for sensitive data
+      run: |
+        # Basic check for common secrets patterns
+        if grep -r "password\|secret\|key" --exclude-dir=node_modules --exclude-dir=.git . | grep -v ".env.example\|README\|.yml\|.yaml"; then
+          echo "⚠️ Potential sensitive data found"
+          exit 1
+        fi
+
+  test:
+    needs: security-check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install Backend Dependencies
+      run: |
+        cd backend
+        pip install -r requirements.txt
+    
+    - name: Install Frontend Dependencies
+      run: |
+        cd frontend
+        npm ci
+    
+    - name: Run Full Test Suite
+      run: |
+        cd backend
+        python -m pytest --cov=. --cov-report=xml
+        cd ../frontend
+        npm test -- --coverage --watchAll=false
+    
+    - name: Build Production Frontend
+      run: |
+        cd frontend
+        REACT_APP_API_URL=https://kitkuhar.com/api npm run build
+
+  deploy-prod:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    environment: production
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to Raspberry Pi (Production)
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.PI_HOST }}
+        username: ${{ secrets.PI_USER }}
+        key: ${{ secrets.PI_SSH_KEY }}
+        script: |
+          cd /home/pi/kitkuhar
+          git pull origin main
+          cp .env.production .env
+          docker-compose down
+          docker-compose up --build -d
+          docker-compose ps
+    
+    - name: Wait for Production Deployment
+      run: sleep 120
+    
+    - name: Production Health Check
+      run: |
+        curl -f https://kitkuhar.com/api/docs || exit 1
+        curl -f https://kitkuhar.com || exit 1
+    
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release v${{ github.run_number }}
+        body: |
+          🚀 Production deployment successful on Raspberry Pi!
+          
+          Changes included in this release:
+          ${{ github.event.head_commit.message }}
+        draft: false
+        prerelease: false
+    
+    - name: Notify Production Deployment
+      run: echo "🎉 Production environment deployed to Raspberry Pi successfully!"
