@@ -65,7 +65,9 @@ jobs:
     - name: Install Frontend Dependencies
       run: |
         cd frontend
+        rm -rf node_modules package-lock.json
         npm install
+        npm ls || true
     
     - name: Run Full Test Suite
       run: |
