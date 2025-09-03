@@ -24,9 +24,10 @@ coverage/
 .env.test.local
 .env.production.local
 
-# Database
-*.db
+# Database (but keep recipes.db for now)
 *.backup
+*.sqlite
+*.sqlite3
 
 # Logs
 *.log

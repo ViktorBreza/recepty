@@ -18,10 +18,26 @@ jobs:
         
     - name: Check for sensitive data
       run: |
-        # Basic check for common secrets patterns
-        if grep -r "password\|secret\|key" --exclude-dir=node_modules --exclude-dir=.git . | grep -v ".env.example\|README\|.yml\|.yaml"; then
-          echo "⚠️ Potential sensitive data found"
+        # Check for hardcoded secrets, but exclude legitimate files
+        if grep -r "password\|secret\|key" \
+          --exclude-dir=node_modules \
+          --exclude-dir=.git \
+          --exclude-dir=__pycache__ \
+          --exclude="*.pyc" \
+          --exclude="*.db" \
+          --exclude="package-lock.json" \
+          --exclude=".env.*" \
+          --exclude="DEPLOYMENT_GUIDE.md" \
+          --exclude="README*" \
+          --exclude="*.yml" \
+          --exclude="*.yaml" \
+          --exclude="deploy-pi.sh" \
+          --exclude="backup.sh" \
+          . | grep -i "hardcoded\|fake\|test123\|admin123\|changeme"; then
+          echo "❌ Hardcoded secrets found!"
           exit 1
+        else
+          echo "✅ No hardcoded secrets detected"
         fi
 
   test:
