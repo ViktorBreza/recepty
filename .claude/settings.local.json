@@ -47,7 +47,12 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(npm test:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(dir:*)",
+      "Read(C:\\Users\\baktorz\\.ssh/**)",
+      "Read(C:\\Users\\baktorz\\.ssh/**)",
+      "Read(C:\\Users\\baktorz\\.ssh/**)",
+      "Read(\\/**)"
     ],
     "deny": [],
     "ask": []
