@@ -72,7 +72,7 @@ jobs:
         cd backend
         python -m pytest --cov=. --cov-report=xml
         cd ../frontend
-        npm test -- --coverage --watchAll=false --passWithNoTests
+        npm test -- --coverage --watchAll=false
     
     - name: Build Production Frontend
       run: |
