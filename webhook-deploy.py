@@ -81,13 +81,24 @@ def deploy_webhook():
         payload = request.get_data()
         signature = request.headers.get('X-Hub-Signature-256', '')
         
+        logger.info(f"Received webhook request, signature: {signature}")
+        logger.info(f"Payload length: {len(payload)} bytes")
+        
         # Verify signature
         if not verify_signature(payload, WEBHOOK_SECRET, signature):
             logger.warning("Invalid webhook signature")
             return jsonify({'error': 'Invalid signature'}), 403
         
         # Parse JSON
-        data = request.get_json()
+        try:
+            data = request.get_json()
+            if data is None:
+                logger.error("Failed to parse JSON from request")
+                return jsonify({'error': 'Invalid JSON'}), 400
+        except Exception as json_error:
+            logger.error(f"JSON parse error: {str(json_error)}")
+            logger.error(f"Raw payload: {payload.decode('utf-8', errors='ignore')}")
+            return jsonify({'error': 'Invalid JSON format'}), 400
         
         # Check if it's a push to main branch
         if data.get('ref') != 'refs/heads/main':
@@ -110,7 +121,7 @@ def deploy_webhook():
         }), 200
         
     except Exception as e:
-        logger.error(f"Webhook error: {str(e)}")
+        logger.error(f"Webhook error: {str(e)}", exc_info=True)
         return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/health', methods=['GET'])
