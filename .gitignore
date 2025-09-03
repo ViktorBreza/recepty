@@ -24,10 +24,13 @@ coverage/
 .env.test.local
 .env.production.local
 
-# Database (but keep recipes.db for now)
+# Database backups and SQLite files
 *.backup
+*.db
 *.sqlite
 *.sqlite3
+
+# But PostgreSQL data is in volumes, not files
 
 # Logs
 *.log

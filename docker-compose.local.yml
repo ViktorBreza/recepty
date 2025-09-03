@@ -15,7 +15,7 @@ services:
       - postgres_data_local:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
-      - "5435:5432"  # Локальний порт
+      - "5435:5432"  # Локальний порт для доступу ззовні
     networks:
       - kitkuhar-local-network
     healthcheck:
@@ -38,7 +38,7 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: 60
       ENVIRONMENT: local
       LOG_LEVEL: DEBUG
-      ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+      ALLOWED_ORIGINS: http://localhost:3001,http://127.0.0.1:3001
     volumes:
       - media_files_local:/app/media
       - ./logs:/app/logs
