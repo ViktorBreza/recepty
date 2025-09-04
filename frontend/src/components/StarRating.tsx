@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { RecipeStats } from '../types';
-import { API_ENDPOINTS } from '../config/api';
+import { apiClient } from '../config/apiClient';
 
 interface StarRatingProps {
   recipeId: number;
@@ -38,16 +37,18 @@ const StarRating: React.FC<StarRatingProps> = ({
     const fetchData = async () => {
       try {
         // Load recipe statistics
-        const statsResponse = await axios.get(`${API_ENDPOINTS.RATINGS}/${recipeId}/stats`);
-        setStats(statsResponse.data);
+        const statsResponse = await apiClient.get<RecipeStats>(`/ratings/${recipeId}/stats`);
+        if (statsResponse.error) {
+          throw new Error(statsResponse.error);
+        }
+        setStats(statsResponse.data || null);
 
         // Load user rating
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const userRatingResponse = await axios.get(
-          `${API_ENDPOINTS.RATINGS}/${recipeId}/user-rating`,
-          { headers }
-        );
-        setUserRating(userRatingResponse.data.rating);
+        const userRatingResponse = await apiClient.get<{rating: number | null}>(`/ratings/${recipeId}/user-rating`);
+        if (userRatingResponse.error) {
+          throw new Error(userRatingResponse.error);
+        }
+        setUserRating(userRatingResponse.data?.rating || null);
       } catch (error: any) {
         console.error('Помилка завантаження оцінки:', error);
         if (error?.code === 'ECONNREFUSED' || error?.code === 'ERR_NETWORK') {
@@ -71,22 +72,23 @@ const StarRating: React.FC<StarRatingProps> = ({
     
     setLoading(true);
     try {
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      
-      await axios.post(
-        API_ENDPOINTS.RATINGS,
-        {
-          recipe_id: recipeId,
-          rating: rating
-        },
-        { headers }
-      );
+      const ratingResponse = await apiClient.post('/ratings/', {
+        recipe_id: recipeId,
+        rating: rating
+      });
+
+      if (ratingResponse.error) {
+        throw new Error(ratingResponse.error);
+      }
 
       setUserRating(rating);
       
       // Update statistics
-      const statsResponse = await axios.get(`${API_ENDPOINTS.RATINGS}/${recipeId}/stats`);
-      setStats(statsResponse.data);
+      const statsResponse = await apiClient.get<RecipeStats>(`/ratings/${recipeId}/stats`);
+      if (statsResponse.error) {
+        throw new Error(statsResponse.error);
+      }
+      setStats(statsResponse.data || null);
     } catch (error) {
       console.error('Помилка збереження оцінки:', error);
       alert('Не вдалося зберегти оцінку');
