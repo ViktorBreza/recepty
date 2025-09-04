@@ -81,7 +81,6 @@ class ApiClient {
       };
 
     } catch (error) {
-      const duration = Date.now() - startTime;
       logger.logApiCall(method, endpoint, 0, error as Error);
       
       return {
