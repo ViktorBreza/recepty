@@ -8,6 +8,8 @@ interface StepMediaProps {
 
 const StepMedia: React.FC<StepMediaProps> = ({ media, stepNumber }) => {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [showFullscreen, setShowFullscreen] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   if (!media || media.length === 0) {
     return null;
@@ -31,18 +33,49 @@ const StepMedia: React.FC<StepMediaProps> = ({ media, stepNumber }) => {
     <div className="step-media-container mt-3">
       <div className="media-viewer position-relative">
         {currentMedia.type === 'image' ? (
-          <img
-            src={currentMedia.url}
-            alt={currentMedia.alt || `Крок ${stepNumber}`}
-            className="img-fluid rounded shadow-sm w-100"
-            style={{ maxHeight: '300px', objectFit: 'cover' }}
-          />
+          <>
+            {!imageError ? (
+              <img
+                src={currentMedia.url}
+                alt={currentMedia.alt || `Крок ${stepNumber}`}
+                className="img-fluid rounded shadow-sm w-100 recipe-step-image"
+                style={{ 
+                  aspectRatio: '16/9',
+                  objectFit: 'contain',
+                  maxHeight: '400px',
+                  minHeight: '200px',
+                  backgroundColor: '#f8f9fa'
+                }}
+                loading="lazy"
+                onError={() => setImageError(true)}
+                onClick={() => setShowFullscreen(true)}
+              />
+            ) : (
+              <div 
+                className="d-flex align-items-center justify-content-center bg-light rounded"
+                style={{ 
+                  aspectRatio: '16/9',
+                  maxHeight: '400px',
+                  minHeight: '200px'
+                }}
+              >
+                <div className="text-center text-muted">
+                  <i className="bi bi-image-fill fs-1 mb-2 d-block"></i>
+                  <small>Не вдалося завантажити зображення</small>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <video
             src={currentMedia.url}
             controls
-            className="w-100 rounded shadow-sm"
-            style={{ maxHeight: '300px' }}
+            className="w-100 rounded shadow-sm recipe-step-video"
+            style={{ 
+              aspectRatio: '16/9',
+              maxHeight: '400px',
+              minHeight: '200px'
+            }}
           >
             Ваш браузер не підтримує відео.
           </video>
@@ -102,6 +135,34 @@ const StepMedia: React.FC<StepMediaProps> = ({ media, stepNumber }) => {
           <small className="text-muted">
             {currentMediaIndex + 1} з {media.length} медіа файлів
           </small>
+        </div>
+      )}
+
+      {/* Fullscreen Modal */}
+      {showFullscreen && currentMedia.type === 'image' && (
+        <div 
+          className="modal show d-block" 
+          style={{ backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 1060 }}
+          onClick={() => setShowFullscreen(false)}
+        >
+          <div className="modal-dialog modal-xl modal-fullscreen-lg-down d-flex align-items-center">
+            <div className="position-relative w-100">
+              <img
+                src={currentMedia.url}
+                alt={currentMedia.alt || `Крок ${stepNumber}`}
+                className="img-fluid w-100 h-auto"
+                style={{ maxHeight: '90vh', objectFit: 'contain' }}
+                onClick={(e) => e.stopPropagation()}
+              />
+              <button
+                className="btn btn-light position-absolute top-0 end-0 m-3 rounded-circle"
+                onClick={() => setShowFullscreen(false)}
+                style={{ width: '40px', height: '40px' }}
+              >
+                <i className="bi bi-x-lg"></i>
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

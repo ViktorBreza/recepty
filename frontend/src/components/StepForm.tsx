@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CookingStep, StepMedia } from '../types';
 import axios from 'axios';
 import { API_ENDPOINTS, API_BASE_URL } from '../config/api';
+import { processImageFiles, validateImageFile } from '../utils/imageUtils';
 
 interface StepFormProps {
   step: CookingStep;
@@ -30,8 +31,36 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
     setUploadError(null);
 
     try {
+      const fileArray = Array.from(files);
+      
+      // Validate files first
+      const validationErrors: string[] = [];
+      fileArray.forEach((file, index) => {
+        const validation = validateImageFile(file);
+        if (!validation.isValid && validation.error) {
+          validationErrors.push(`${file.name}: ${validation.error}`);
+        }
+      });
+
+      if (validationErrors.length > 0) {
+        setUploadError(validationErrors.join('; '));
+        return;
+      }
+
+      // Separate images and videos
+      const imageFiles = fileArray.filter(file => file.type.startsWith('image/'));
+      const videoFiles = fileArray.filter(file => file.type.startsWith('video/'));
+
+      // Process images (resize/optimize)
+      const processedImages = imageFiles.length > 0 
+        ? await processImageFiles(imageFiles, { maxWidth: 1200, maxHeight: 800, quality: 0.85 })
+        : [];
+
+      // Combine processed images with videos
+      const allProcessedFiles = [...processedImages, ...videoFiles];
+
       const formData = new FormData();
-      Array.from(files).forEach(file => {
+      allProcessedFiles.forEach(file => {
         formData.append('files', file);
       });
 
@@ -159,13 +188,13 @@ const StepForm: React.FC<StepFormProps> = ({ step, onUpdate, onDelete, stepIndex
                         src={media.url}
                         alt={media.alt}
                         className="img-fluid rounded"
-                        style={{ height: '80px', width: '100%', objectFit: 'cover' }}
+                        style={{ height: '80px', width: '100%', objectFit: 'contain', backgroundColor: '#f8f9fa' }}
                       />
                     ) : (
                       <video
                         src={media.url}
                         className="w-100 rounded"
-                        style={{ height: '80px', objectFit: 'cover' }}
+                        style={{ height: '80px', objectFit: 'contain', backgroundColor: '#f8f9fa' }}
                       />
                     )}
                     <button
