@@ -41,8 +41,7 @@ def test_password_hashing():
     assert verify_password(password, hashed) is True
     assert verify_password("wrong_password", hashed) is False
 
-@pytest.mark.asyncio
-async def test_health_check():
+def test_health_check():
     """Test basic application health"""
     # This is a placeholder - would need actual FastAPI app setup
     assert True  # Basic smoke test
