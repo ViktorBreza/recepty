@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app import crud, schemas, database, auth, models
 
-router = APIRouter(prefix="/categories", tags=["categories"])
+router = APIRouter(prefix="/api/categories", tags=["categories"])
 get_db = database.get_db
 
 @router.get("/", response_model=List[schemas.Category])

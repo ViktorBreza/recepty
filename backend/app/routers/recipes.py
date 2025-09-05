@@ -4,7 +4,7 @@ from typing import List, Optional
 from app import crud, schemas, database
 from app.logger import log_database_event, log_error
 
-router = APIRouter(prefix="/recipes", tags=["recipes"])
+router = APIRouter(prefix="/api/recipes", tags=["recipes"])
 get_db = database.get_db
 
 # -------------------------------

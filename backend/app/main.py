@@ -64,7 +64,7 @@ def health():
 app.include_router(auth.router)
 app.include_router(recipes.router)
 app.include_router(categories.router)
-app.include_router(tags.router)
+app.include_router(tags.router) 
 app.include_router(media.router)
 app.include_router(ratings.router)
 app.include_router(comments.router)

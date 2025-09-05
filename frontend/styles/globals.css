@@ -1,0 +1,116 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #FDEFDA !important;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(250,235,215,0.8) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255,248,220,0.6) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(245,245,220,0.4) 0%, transparent 50%) !important;
+  min-height: 100vh !important;
+}
+
+#__next {
+  background-color: transparent !important;
+  min-height: 100vh;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Стильна кнопка з hover ефектом */
+.hero-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 24px rgba(59, 130, 246, 0.4), 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+@keyframes gentle-float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-10px) rotate(1deg); 
+  }
+}
+
+.mascot-hover-effect {
+  transition: all 0.3s ease;
+}
+
+.mascot-hover-effect:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 15px 30px rgba(0,0,0,0.2));
+}
+
+.card, .bg-light {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Recipe step media styles */
+.recipe-step-image,
+.recipe-step-video {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.recipe-step-image:hover,
+.recipe-step-video:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.step-media-container {
+  margin: 1rem 0;
+}
+
+.media-viewer {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8f9fa;
+}
+
+/* Responsive breakpoints for images */
+@media (max-width: 576px) {
+  .recipe-step-image,
+  .recipe-step-video {
+    aspect-ratio: 4/3 !important;
+    max-height: 250px !important;
+    min-height: 150px !important;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  .recipe-step-image,
+  .recipe-step-video {
+    aspect-ratio: 16/10 !important;
+    max-height: 300px !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .recipe-step-image,
+  .recipe-step-video {
+    max-height: 500px !important;
+  }
+}
+
+.nav-link, .navbar-brand {
+  color: #5a4a3a !important;
+}
+
+.nav-link:hover {
+  color: #3a2a1a !important;
+}
+
+.active {
+  font-weight: bold;
+  border-bottom: 2px solid #007bff;
+}

@@ -8,7 +8,7 @@ from app.database import get_db
 from app import models, schemas, auth
 from app.logger import log_auth_event, log_error
 
-router = APIRouter(prefix="/auth", tags=["authentication"])
+router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
 @router.post("/register", response_model=schemas.User)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):

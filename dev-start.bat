@@ -16,7 +16,7 @@ timeout /t 10 > nul
 echo.
 echo Development environment started!
 echo.
-echo Frontend: http://localhost:3001
+echo Frontend: http://localhost:3333
 echo Backend API: http://localhost:8001/api
 echo Backend Docs: http://localhost:8001/docs
 echo Database: localhost:5435

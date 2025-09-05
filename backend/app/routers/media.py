@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from typing import List
 from app.file_handler import save_recipe_step_file, save_multiple_step_files, delete_recipe_step_file
 
-router = APIRouter(prefix="/media", tags=["media"])
+router = APIRouter(prefix="/api/media", tags=["media"])
 
 @router.post("/upload-step-file")
 async def upload_step_file(file: UploadFile = File(...)):

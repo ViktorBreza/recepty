@@ -4,7 +4,7 @@ from typing import Optional, List
 from app import crud, schemas, database
 from app.auth import get_current_user_optional
 
-router = APIRouter(prefix="/comments", tags=["comments"])
+router = APIRouter(prefix="/api/comments", tags=["comments"])
 get_db = database.get_db
 
 def get_session_id(request: Request) -> str:
