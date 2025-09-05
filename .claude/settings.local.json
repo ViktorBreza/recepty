@@ -96,7 +96,9 @@
       "Read(/C:\\Users\\baktorz\\Desktop\\kitkuhar\\frontend\\src\\components/**)",
       "Read(/C:\\Users\\baktorz\\Desktop\\kitkuhar\\frontend\\src\\components/**)",
       "WebSearch",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "Bash(git pull:*)",
+      "Bash(.dev-start.bat)"
     ],
     "deny": [],
     "ask": []

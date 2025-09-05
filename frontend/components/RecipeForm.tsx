@@ -5,6 +5,22 @@ import { Recipe, Category, Tag, Ingredient } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { API_ENDPOINTS } from '@/config/api';
 
+// Types for step-by-step functionality
+interface StepMedia {
+  id?: string;
+  type: 'image' | 'video';
+  filename: string;
+  url: string;
+  alt?: string;
+}
+
+interface CookingStep {
+  id?: string;
+  stepNumber: number;
+  description: string;
+  media?: StepMedia[];
+}
+
 interface RecipeFormProps {
   recipeId?: number;
 }
@@ -14,7 +30,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ recipeId }) => {
     title: '',
     description: '',
     ingredients: [{ name: '', quantity: 1, unit: 'шт' }],
-    steps: '',
+    steps: [{ stepNumber: 1, description: '', media: [] }] as CookingStep[],
     servings: 1,
     category: null,
     tags: []
@@ -25,6 +41,98 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ recipeId }) => {
   const [error, setError] = useState<string>('');
   const { token } = useAuth();
   const router = useRouter();
+
+  // Helper functions for steps management
+  const addStep = () => {
+    const steps = Array.isArray(recipe.steps) ? recipe.steps : [];
+    const newStep: CookingStep = {
+      stepNumber: steps.length + 1,
+      description: '',
+      media: []
+    };
+    setRecipe({ ...recipe, steps: [...steps, newStep] });
+  };
+
+  const updateStep = (index: number, field: keyof CookingStep, value: any) => {
+    if (!Array.isArray(recipe.steps)) return;
+    
+    const updatedSteps = [...recipe.steps];
+    updatedSteps[index] = { ...updatedSteps[index], [field]: value };
+    setRecipe({ ...recipe, steps: updatedSteps });
+  };
+
+  const removeStep = (index: number) => {
+    if (!Array.isArray(recipe.steps) || recipe.steps.length <= 1) return;
+    
+    const updatedSteps = recipe.steps.filter((_, i) => i !== index);
+    // Renumber steps
+    updatedSteps.forEach((step, i) => {
+      step.stepNumber = i + 1;
+    });
+    setRecipe({ ...recipe, steps: updatedSteps });
+  };
+
+  const uploadStepMedia = async (stepIndex: number, file: File): Promise<StepMedia | null> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await axios.post(`${API_ENDPOINTS.MEDIA}/upload-step-file`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data.success) {
+        return {
+          type: response.data.file.type,
+          filename: response.data.file.filename,
+          url: response.data.file.url,
+          alt: file.name
+        };
+      }
+    } catch (error) {
+      console.error('Media upload error:', error);
+      setError('Помилка завантаження медіа файлу');
+    }
+    return null;
+  };
+
+  const handleFileUpload = async (stepIndex: number, files: FileList) => {
+    if (!Array.isArray(recipe.steps)) return;
+    
+    const uploadPromises = Array.from(files).map(file => uploadStepMedia(stepIndex, file));
+    const uploadedMedia = await Promise.all(uploadPromises);
+    const validMedia = uploadedMedia.filter(media => media !== null) as StepMedia[];
+    
+    const updatedSteps = [...recipe.steps];
+    const currentMedia = updatedSteps[stepIndex].media || [];
+    updatedSteps[stepIndex].media = [...currentMedia, ...validMedia];
+    setRecipe({ ...recipe, steps: updatedSteps });
+  };
+
+  const removeStepMedia = async (stepIndex: number, mediaIndex: number) => {
+    if (!Array.isArray(recipe.steps)) return;
+    
+    const step = recipe.steps[stepIndex];
+    if (!step.media || !Array.isArray(step.media)) return;
+    const media = step.media[mediaIndex];
+    
+    try {
+      // Delete from server
+      await axios.delete(`${API_ENDPOINTS.MEDIA}/delete-step-file/${media.filename}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (error) {
+      console.error('Error deleting media:', error);
+    }
+    
+    // Remove from state
+    const updatedSteps = [...recipe.steps];
+    updatedSteps[stepIndex].media = (step.media || []).filter((_, i) => i !== mediaIndex);
+    setRecipe({ ...recipe, steps: updatedSteps });
+  };
 
   useEffect(() => {
     // Load categories and tags
@@ -55,6 +163,17 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ recipeId }) => {
             recipeData.ingredients = [{ name: '', quantity: 1, unit: 'шт' }];
           }
           
+          // Convert old string steps to new format if needed
+          if (typeof recipeData.steps === 'string' && recipeData.steps) {
+            recipeData.steps = [{ 
+              stepNumber: 1, 
+              description: recipeData.steps, 
+              media: [] 
+            }];
+          } else if (!Array.isArray(recipeData.steps)) {
+            recipeData.steps = [{ stepNumber: 1, description: '', media: [] }];
+          }
+          
           setRecipe(recipeData);
         } catch (err) {
           setError('Не вдалося завантажити рецепт');
@@ -73,6 +192,13 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ recipeId }) => {
       return;
     }
 
+    // Validate steps
+    if (!Array.isArray(recipe.steps) || recipe.steps.length === 0 || 
+        recipe.steps.some(step => !step.description.trim())) {
+      setError('Будь ласка, додайте хоча б один крок з описом');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -80,7 +206,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ recipeId }) => {
       const recipeData = {
         ...recipe,
         ingredients: recipe.ingredients?.filter(ing => ing.name.trim() !== ''),
-        steps: typeof recipe.steps === 'string' ? recipe.steps : recipe.steps?.join('\n') || ''
+        steps: recipe.steps.filter(step => step.description.trim() !== '')
       };
 
       if (recipeId) {
@@ -234,18 +360,96 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ recipeId }) => {
           </div>
 
           <div className="mb-3">
-            <label htmlFor="steps" className="form-label">
-              Інструкції з приготування *
+            <label className="form-label">
+              Кроки приготування *
             </label>
-            <textarea
-              className="form-control"
-              id="steps"
-              rows={6}
-              value={typeof recipe.steps === 'string' ? recipe.steps : ''}
-              onChange={(e) => setRecipe({ ...recipe, steps: e.target.value })}
-              placeholder="Опишіть кроки приготування..."
-              required
-            />
+            
+            {Array.isArray(recipe.steps) && recipe.steps.map((step, index) => (
+              <div key={index} className="border rounded p-3 mb-3" style={{backgroundColor: '#f8f9fa'}}>
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <h6 className="mb-0">Крок {step.stepNumber}</h6>
+                  {recipe.steps && recipe.steps.length > 1 && (
+                    <button
+                      type="button"
+                      className="btn btn-outline-danger btn-sm"
+                      onClick={() => removeStep(index)}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+                
+                <div className="mb-3">
+                  <textarea
+                    className="form-control"
+                    rows={3}
+                    placeholder="Опишіть цей крок приготування..."
+                    value={step.description}
+                    onChange={(e) => updateStep(index, 'description', e.target.value)}
+                    required
+                  />
+                </div>
+                
+                <div className="mb-3">
+                  <label className="form-label">Медіа файли для кроку:</label>
+                  <input
+                    type="file"
+                    className="form-control"
+                    multiple
+                    accept="image/*,video/*"
+                    onChange={(e) => e.target.files && handleFileUpload(index, e.target.files)}
+                  />
+                  <small className="form-text text-muted">
+                    Можна додати кілька зображень або відео. Максимум 5 файлів на крок.
+                  </small>
+                </div>
+                
+                {step.media && Array.isArray(step.media) && step.media.length > 0 && (
+                  <div className="mb-2">
+                    <label className="form-label">Додані файли:</label>
+                    <div className="row">
+                      {step.media.map((media, mediaIndex) => (
+                        <div key={mediaIndex} className="col-md-3 mb-2">
+                          <div className="position-relative">
+                            {media.type === 'image' ? (
+                              <img
+                                src={media.url}
+                                alt={media.alt || `Крок ${step.stepNumber} зображення ${mediaIndex + 1}`}
+                                className="img-fluid rounded"
+                                style={{maxHeight: '150px', objectFit: 'contain', width: '100%'}}
+                              />
+                            ) : (
+                              <video
+                                src={media.url}
+                                className="img-fluid rounded"
+                                style={{maxHeight: '150px', width: '100%'}}
+                                controls
+                              />
+                            )}
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm position-absolute"
+                              style={{top: '5px', right: '5px'}}
+                              onClick={() => removeStepMedia(index, mediaIndex)}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+            
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={addStep}
+            >
+              + Додати крок
+            </button>
           </div>
 
           <div className="d-flex justify-content-between">
