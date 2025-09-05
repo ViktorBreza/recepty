@@ -83,7 +83,7 @@ jobs:
     - name: Build Production Frontend
       run: |
         cd frontend
-        REACT_APP_API_URL=https://kitkuhar.com/api npm run build
+        NEXT_PUBLIC_API_URL=https://kitkuhar.com/api npm run build
 
   deploy-prod:
     needs: test
