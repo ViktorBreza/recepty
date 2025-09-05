@@ -28,7 +28,7 @@ class Logger {
   private logs: LogEntry[] = [];
 
   constructor() {
-    this.isDevelopment = process.env.NODE_ENV === 'development';
+    this.isDevelopment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
   }
 
   private createLogEntry(level: LogLevel, message: string, context?: LogContext): LogEntry {
@@ -57,7 +57,7 @@ class Logger {
     if (this.isDevelopment) {
       const consoleMethod = level === LogLevel.ERROR ? 'error' :
                            level === LogLevel.WARN ? 'warn' :
-                           level === LogLevel.INFO ? 'info' : 'log';
+                           'log';
       
       console[consoleMethod](`[${level.toUpperCase()}] ${message}`, context || '');
     }
@@ -89,7 +89,7 @@ class Logger {
   }
 
   warn(message: string, context?: LogContext): void {
-    this.log(LogLevel.WARN, message, context);
+    this.log(LogLevel.WARN, `Warning: ${message}`, context);
   }
 
   info(message: string, context?: LogContext): void {
@@ -97,34 +97,28 @@ class Logger {
   }
 
   debug(message: string, context?: LogContext): void {
-    if (this.isDevelopment) {
-      this.log(LogLevel.DEBUG, message, context);
-    }
+    this.log(LogLevel.DEBUG, `Debug: ${message}`, context);
   }
 
   // Specific methods for different types of events
   logUserAction(action: string, data?: any, userId?: number): void {
-    this.info(`User action: ${action}`, {
-      action,
-      data,
-      userId,
-      component: 'user_action'
-    });
+    const contextData = { ...data };
+    if (userId) contextData.userId = userId;
+    
+    this.log(LogLevel.INFO, `User Action: ${action}`, contextData);
   }
 
   logApiCall(method: string, url: string, status?: number, error?: Error): void {
-    const level = error || (status && status >= 400) ? LogLevel.ERROR : LogLevel.INFO;
-    const message = `API call: ${method} ${url}`;
+    const isError = error || (status && status >= 400);
+    const level = isError ? LogLevel.ERROR : LogLevel.INFO;
+    const message = isError ? `API Error: ${method} ${url}` : `API Call: ${method} ${url}`;
     
-    const context: LogContext = {
-      action: 'api_call',
-      component: 'api',
-      url,
-      data: { method, status }
+    const context: any = {
+      status
     };
 
     if (error) {
-      context.error = error;
+      context.error = error.message;
     }
 
     this.log(level, message, context);
