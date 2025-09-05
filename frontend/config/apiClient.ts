@@ -10,7 +10,7 @@ class ApiClient {
   private baseURL: string;
   private defaultHeaders: HeadersInit;
 
-  constructor(baseURL: string = typeof window !== 'undefined' ? 'http://localhost:8000/api' : 'http://backend:8000/api') {
+  constructor(baseURL: string = typeof window !== 'undefined' ? 'http://kitkuhar.com/api' : 'http://backend:8000/api') {
     this.baseURL = baseURL;
     this.defaultHeaders = {
       'Content-Type': 'application/json',
