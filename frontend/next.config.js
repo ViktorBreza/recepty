@@ -5,14 +5,7 @@ const nextConfig = {
     domains: ['localhost', '127.0.0.1'],
     unoptimized: true
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://kitkuhar.com'}/api/:path*`,
-      },
-    ]
-  },
+  // Remove rewrites - let nginx handle /api/ routing directly
 }
 
 module.exports = nextConfig
