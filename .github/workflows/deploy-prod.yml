@@ -107,8 +107,9 @@ jobs:
         curl -f https://webhook.kitkuhar.com/health || echo "Health check failed"
         
         # Prepare webhook payload (escape commit message)
-        COMMIT_MSG=$(echo '${{ github.event.head_commit.message }}' | sed 's/"/\\"/g' | tr '\n' ' ')
-        PAYLOAD="{\"ref\":\"refs/heads/main\",\"after\":\"${{ github.sha }}\",\"head_commit\":{\"message\":\"${COMMIT_MSG}\"}}"
+        COMMIT_MSG="${{ github.event.head_commit.message }}"
+        COMMIT_MSG_ESCAPED=$(echo "$COMMIT_MSG" | sed 's/"/\\"/g' | tr '\n' ' ')
+        PAYLOAD="{\"ref\":\"refs/heads/main\",\"after\":\"${{ github.sha }}\",\"head_commit\":{\"message\":\"${COMMIT_MSG_ESCAPED}\"}}"
         echo "Payload: $PAYLOAD"
         
         # Create signature
