@@ -8,7 +8,7 @@ from app.logger import app_logger, log_request
 import time
 import os
 
-app = FastAPI(title="Recipe App API")
+app = FastAPI(title="Recipe App API", docs_url="/api/docs", redoc_url="/api/redoc")
 
 # Create database tables after app creation
 Base.metadata.create_all(bind=engine)
@@ -53,7 +53,7 @@ app.add_middleware(
 # Root endpoint -> redirect to docs
 @app.get("/", include_in_schema=False)
 def root():
-    return RedirectResponse(url="/docs")
+    return RedirectResponse(url="/api/docs")
 
 # Health check endpoint
 @app.get("/health", include_in_schema=False)
