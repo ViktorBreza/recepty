@@ -8,7 +8,12 @@ from app.logger import app_logger, log_request
 import time
 import os
 
-app = FastAPI(title="Recipe App API", docs_url="/api/docs", redoc_url="/api/redoc")
+app = FastAPI(
+    title="Recipe App API", 
+    docs_url="/api/docs", 
+    redoc_url="/api/redoc",
+    version="1.0.1"
+)
 
 # Create database tables after app creation
 Base.metadata.create_all(bind=engine)
