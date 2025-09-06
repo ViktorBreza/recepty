@@ -51,6 +51,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Test Nginx Configuration
+      run: |
+        chmod +x scripts/test-nginx-config.sh
+        ./scripts/test-nginx-config.sh
+    
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -139,10 +144,10 @@ jobs:
         echo "Checking deployment status..."
         curl -f https://webhook.kitkuhar.com/status || echo "Status check failed"
     
-    - name: Production Health Check
+    - name: Comprehensive Deployment Verification
       run: |
-        curl -f https://kitkuhar.com/api/docs || exit 1
-        curl -f https://kitkuhar.com || exit 1
+        chmod +x scripts/verify-deployment.sh
+        ./scripts/verify-deployment.sh
     
     # Release creation disabled due to permissions issue
     # - name: Create Release
