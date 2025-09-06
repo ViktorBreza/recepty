@@ -59,7 +59,7 @@ services:
     container_name: kitkuhar-frontend
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://backend:8000
+      NEXT_PUBLIC_API_BASE_URL: https://kitkuhar.com
       NODE_ENV: production
     ports:
       - "3000:3000"
