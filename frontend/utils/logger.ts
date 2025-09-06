@@ -62,12 +62,12 @@ class Logger {
       console[consoleMethod](`[${level.toUpperCase()}] ${message}`, context || '');
     }
 
-    // Send to backend in production (non-blocking)
-    if (!this.isDevelopment && level === LogLevel.ERROR) {
-      this.sendToBackend(entry).catch(() => {
-        // Silent fail - don't throw errors from logger
-      });
-    }
+    // Send to backend in production (non-blocking) - DISABLED until /api/logs endpoint exists
+    // if (!this.isDevelopment && level === LogLevel.ERROR) {
+    //   this.sendToBackend(entry).catch(() => {
+    //     // Silent fail - don't throw errors from logger
+    //   });
+    // }
   }
 
   private async sendToBackend(entry: LogEntry): Promise<void> {
