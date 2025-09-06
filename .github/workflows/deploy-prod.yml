@@ -136,8 +136,8 @@ jobs:
           echo "✅ Webhook deployment triggered successfully"
         fi
     
-    - name: Wait for Production Deployment
-      run: sleep 120
+    - name: Wait for Production Deployment  
+      run: sleep 300
     
     - name: Check Deployment Status
       run: |
