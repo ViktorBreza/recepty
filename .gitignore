@@ -49,6 +49,11 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+.claude/
+
+# Coverage reports
+.coverage
+coverage.xml
 
 # Media uploads (keep structure, ignore content)
 backend/media/*
