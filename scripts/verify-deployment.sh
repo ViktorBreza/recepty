@@ -19,12 +19,13 @@ else
     exit 1
 fi
 
-# Test API health
+# Test API health (backend health endpoint is at /health, not /api/health)
 echo "Testing API health..."
-if curl -f -s --max-time $TIMEOUT "$BASE_URL/api/health" > /dev/null; then
+if curl -f -s --max-time $TIMEOUT "$BASE_URL/health" > /dev/null; then
     echo "✅ API health: OK"
 else
     echo "❌ API health: FAILED"
+    echo "Note: Backend health endpoint might not be accessible through nginx routing"
     exit 1
 fi
 
