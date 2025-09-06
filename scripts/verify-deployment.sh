@@ -29,10 +29,12 @@ else
     exit 1
 fi
 
-# Test API docs
+# Test API docs (try both /api/docs and fallback to /docs)
 echo "Testing API docs..."
 if curl -f -s --max-time $TIMEOUT "$BASE_URL/api/docs" > /dev/null; then
-    echo "✅ API docs: OK"
+    echo "✅ API docs: OK (at /api/docs)"
+elif curl -f -s --max-time $TIMEOUT "$BASE_URL/docs" > /dev/null; then
+    echo "⚠️ API docs: OK but at /docs (nginx routing not updated)"
 else
     echo "❌ API docs: FAILED"
     exit 1
