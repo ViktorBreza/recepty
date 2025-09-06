@@ -1,4 +1,5 @@
 # Multi-stage build for ARM64 (Pi 5) optimization
+# FORCE REBUILD v1.0.1 - fixing docs_url=/api/docs
 FROM python:3.11-slim as builder
 
 # Set working directory
